@@ -29,3 +29,60 @@ self-contained and no other repositories' code was modified (although specific c
   - This *bottlenecks* wind turbine production.
 - *SOLUTION*
   - Autonomous sanding robots to lighten worker's physical (via sanding )and mental (via finding defects) load.
+  
+## The Robot Setup 
+- A Kobuki Base with Turtlebot platforms and 2 ASUS XTION Pro cameras.
+- Laptop that came with the Turtlebot was not used due to the resource requirements of an unoptimized octomap 3D map. 
+
+![Robot_Setup](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Robot_Setup.png)
+
+## What Was Scanned
+- A scaled down windblade. Dimensions: 87.5 in. x 24.5 in.
+
+![windblade](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/What_Was_Scanned.png)
+
+## Workspace 
+- The working area of the robot.
+
+![workspace](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Where_Was_Scanned.png)
+
+
+## The Results (As seen in RVIZ)
+
+### Filtered Pointclouds and LaserScans 
+- Laserscan is FAKE. It was made from the filtered PointCloud data. 
+
+![filted_PC_and_LS](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Filtered_PointClouds_and_Laserscans.png)
+
+### 3D Map Generated
+- What was made using Octomap defaults from the filtered pointclouds.
+- Notice the "large" amount of noise around the blade.
+
+![3D_Map](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/3D_Map_Made.png)
+
+### 2D Maps Generated 
+
+- Top Camera's generated map:
+![Top_Cam_Map](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/2D_Top_Map.png)
+
+- Bottom Camera's generated map:
+![Bottom_Cam_Map](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/2D_Bottom_Map.png)
+
+- Overlayed Camera map:
+![Overlayed_Map](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Overlapped_Maps.png)
+
+- Observations 
+  - Top map much noisier. Needs filter. 
+  - Top map thresholding not very good. Catches part of the floor depending on how the robot leans.
+  - Demonstrates that multiple sensors help to filter out information that is NOT true.
+  
+## Localization (Based on AMCL)
+
+![localization](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Final_Localization.png)
+  
+## Final Result
+- Everything together.
+
+![combined_project](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Final_Result.png)
+
+
