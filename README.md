@@ -4,7 +4,7 @@
 ## 12/8/2022 Branch Purpose 
 - To document the performance of the workspace created by my team for a capstone during the ENGR 4200 Autonomous Systems class hosted by Louisiana State University (LSU).
 - To differentiate the performance between the robot by the end of the class and what I've done to improve it independently for research thereafter. 
-- To differentiate between before and after I knew how to put together a package with dependencies. 
+- To differentiate between before and after I knew how to put together a ROS package with dependencies. 
 
 *NOTE*: The code for the workspace has **NOT** been provided (in this branch) because it was quite large and several files from existing repositories were changed during the project's 
 development (see *Section: catkin_ws layout and modified repositories*). ***This should not be a problem now since the MAIN branch is now CLEAN***. I.e. it is 
@@ -77,6 +77,7 @@ self-contained and no other repositories' code was modified (although specific c
   - Demonstrates that multiple sensors help to filter out information that is NOT true.
   
 ## Localization (Based on AMCL)
+- 2 pose arrays, 1 for each camera. For visualization. 
 
 ![localization](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Final_Localization.png)
   
@@ -85,4 +86,42 @@ self-contained and no other repositories' code was modified (although specific c
 
 ![combined_project](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/Final_Result.png)
 
+## Video Presentation
+- Link to the Turtlebot's full performance, post Capstone.
+
+[ENGR 4100 Robot Performance](https://www.youtube.com/watch?v=QBd6rT89Lpw)
+
+# File Structure 
+- Images are provided instead of the actual src folder to prove a point, that is, don't modify existing packages. Keep projects contained in a single package or a batch of packages. Copy code if needed to make changes. Otherwise, it gets messy. 
+
+## Src Folder Structure 
+
+![src_structure](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/original_src_file_structure.png)
+
+## Pkg file structure 
+
+![pkg_structure](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/original_pkg_file_structure.png)
+
+## Modified Repositories
+... Don't do this. Otherwise it'll try to push the change you've made to the pkg source. 
+
+![modified_gits](https://github.com/HailtheWhale/Image_Repo/blob/main/Research/Autonomous_Windblade_Sanding/modified_github_repos.png)
+
+# Main Areas of Improvement
+- Future improvements to be made (as of 12/8/22):
+  - Filter Noise from the depth images.
+  - Reduce voxel resolution (Less blocky).
+  - SLAM (Not using prebuilt/loaded map).
+  - Improve pathing (Not jerky, like below).
+  
+  
+  
+ - Future improvements to be made (as of 12/8/22):
+  - Make package self-contained (No modifications distributed among folders and other GitHub packages).
+  - Make xacro file for Turtlebot more modular (Originally brute forced with copy pasting stuff in the ASUS camera xacro to get working. Not the way Xacro Macros are supposed to be used).
+  - Ground the world frame anywhere that is not where robot base turns on (Imprecise. Not Accurate when using generated map for other robots).
+  - Make pointcloud thresholding more intelligent (that is, not based on distance from the sensor).
+  - Change the colormapping of the Octomap voxels (so that they mean something besides distance from the ground). 
+  - Apply what was done to a mobile manipulator (like the Robotnik).
+  - etc. 
 
