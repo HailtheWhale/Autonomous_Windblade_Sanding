@@ -1,0 +1,33 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+
+
+  <!-- Filters based on distance from cam. Not very adaptive. Would be better if filtered based on some kind of fake data, maybe from Gazebo-->
+  <!-- Run a passthrough filter to clean NaNs -->
+
+  <!-- Multi-Level to enable multiple dimensions for filtering -->
+  <node pkg="nodelet" type="nodelet" name="zed_2i_filtered1" args="load pcl/PassThrough pcl_manager" output="screen">
+    <remap from="~input" to="/zed2i/zed_node/point_cloud/cloud_registered" />
+    <!--Blue Axis  -->
+    <rosparam>
+      filter_field_name: x
+      filter_limit_min: 0.0
+      filter_limit_max: 2.1
+      filter_limit_negative: False
+    </rosparam>
+
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="zed_2i_filtered2" args="load pcl/PassThrough pcl_manager" output="screen">
+    <remap from="~input" to="/zed_2i_filtered1/output" />
+    <!--Blue Axis  -->
+    <rosparam>
+      filter_field_name: y
+      filter_limit_min: -1.0
+      filter_limit_max: 1.0
+      filter_limit_negative: False
+    </rosparam>
+
+  </node>
+
+</launch>

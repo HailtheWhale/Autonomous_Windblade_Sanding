@@ -1,0 +1,45 @@
+<!-- 
+  Example launch file for octomap_server mapping: 
+  Listens to incoming PointCloud2 data and incrementally builds an octomap. 
+  The data is sent out in different representations. 
+
+  Copy this file into your workspace and adjust as needed, see
+  www.ros.org/wiki/octomap_server for details  
+-->
+<launch>
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server_turtlebot">
+		<param name="resolution" value="0.01" />
+		
+		<!-- fixed map frame  -->
+		<param name="frame_id" type="string" value="world" />
+		
+		<!-- maximum range to integrate (speedup!) -->
+		<param name="sensor_model/max_range" value="5.0" />
+
+		<!-- Salt and Pepper Filter !!! (UNDOCUMENTED Param)-->
+		<param name="filter_speckles" value="true"/>
+
+		<!-- Filter workspace -->
+		<param name="filter_ground" value="false"/>
+
+		<param name="pointcloud_min_x" value="-1.0"/>
+		<param name="pointcloud_max_x" value="1.3"/>
+		<param name="pointcloud_min_y" value="0.45"/>
+		<param name="pointcloud_max_y" value="3.85"/>
+		<param name="pointcloud_max_z" value="0.85"/>
+		<param name="pointcloud_min_z" value="0.50"/>
+
+		<!-- Camera 1. Remap Occupied Cells, Free Cells, and Projected Map Topics to allow multiple to run simultaneously. -->
+		<remap from="occupied_cells_vis_array" to="occupied_cells_vis_array_turtlebot"/>
+		<remap from="free_cells_vis_array" to="free_cells_vis_array_turtlebot"/>
+		<remap from="projected_map" to="projected_map_turtlebot"/>
+		<remap from="octomap_binary" to="octomap_binary_turtlebot"/>
+		<remap from="octomap_full" to="octomap_full_turtlebot"/>
+		<remap from="octomap_point_cloud_centers" to="octomap_point_cloud_centers_turtlebot"/>
+
+		<!-- data source to integrate (PointCloud2) -->
+		<remap from="cloud_in" to="/camera1/depth/points" />
+	
+	</node>
+
+</launch>

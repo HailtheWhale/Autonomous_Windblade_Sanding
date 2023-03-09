@@ -1,0 +1,29 @@
+<launch>
+  <!-- NOTE: Camera launch file is not included because it must be troubleshooted to find the correct port id. 
+  Including it in the msg feed would make it messy for debug. -->
+
+  <!-- Launch Turtlebot base stuff. -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/turtlebot_bringup.launch"/>
+
+  <!-- Launch World Frame. -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/world_frame/world.launch"/>
+
+  <!-- Launch Pointcloud thresholding stuff. -->
+  <include file="$(find windblade_scanner)/launch/3_pc_thresholding/pc_threshold.launch"/>
+
+  <!-- Launch Octomap stuff. -->
+  <include file="$(find windblade_scanner)/launch/4_octomap/octomap_mapping.launch"/>
+
+  <!-- Launch Fake Laserscanner stuff. -->
+  <include file="$(find windblade_scanner)/launch/5_point2laser/point2laser.launch"/>
+
+  <!-- Launch Localization stuff. -->
+ <!-- <include file="$(find windblade_scanner)/launch/6_localization/localization.launch"/>-->
+
+  <!-- Launch RVIZ -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find windblade_scanner)/rviz/setup.rviz" />
+
+  <!-- Launch Movement -->
+  <include file="$(find windblade_scanner)/launch/7_waypoints/waypoint_seeker.launch"/>
+
+</launch>

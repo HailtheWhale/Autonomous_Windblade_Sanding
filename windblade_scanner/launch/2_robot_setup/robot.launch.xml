@@ -1,0 +1,25 @@
+<!--
+  Assuming working with Kobuki mobile base and ASUS XTION Pro Cameras (What pkg was build based on)
+ -->
+<launch>
+
+  <arg name="base"/>
+
+  <!-- Pulling xacro files from this package. These were based on Turtlebot xacros-->
+  <arg name="urdf_file" default="$(find xacro)/xacro '$(find windblade_scanner)/robots/megabot.urdf.xacro'"/>
+  <param name="robot_description" command="$(arg urdf_file)"/>
+
+
+  <!-- important generally, but specifically utilised by the current app manager -->  
+  <param name="robot/name" value="$(optenv ROBOT turtlebot)"/>
+  <param name="robot/type" value="turtlebot"/>
+  
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="5.0" />
+  </node>
+
+  <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
+    <rosparam command="load" file="$(find turtlebot_bringup)/param/$(arg base)/diagnostics.yaml" />
+  </node>
+
+</launch>

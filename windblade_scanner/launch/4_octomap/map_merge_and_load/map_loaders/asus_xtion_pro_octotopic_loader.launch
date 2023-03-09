@@ -1,0 +1,35 @@
+<!-- 
+  Example launch file for octomap_server mapping: 
+  Listens to incoming PointCloud2 data and incrementally builds an octomap. 
+  The data is sent out in different representations. 
+
+  Copy this file into your workspace and adjust as needed, see
+  www.ros.org/wiki/octomap_server for details  
+-->
+<launch>
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server_merged">
+		<param name="resolution" value="0.01" />
+		
+		<!-- fixed map frame  -->
+		<param name="frame_id" type="string" value="world" />
+		
+		<!-- maximum range to integrate (speedup!) -->
+		<param name="sensor_model/max_range" value="5.0" />
+
+		<!-- Salt and Pepper Filter !!! (UNDOCUMENTED Param)-->
+		<param name="filter_speckles" value="true"/>
+
+		<!-- Merged Map. Based on the Pointcloud2 published by the Octomap Merger. -->
+		<remap from="occupied_cells_vis_array" to="occupied_cells_vis_array_merged"/>
+		<remap from="free_cells_vis_array" to="free_cells_vis_array_merged"/>
+		<remap from="projected_map" to="projected_map_merged"/>
+		<remap from="octomap_binary" to="octomap_binary_merged"/>
+		<remap from="octomap_full" to="octomap_full_merged"/>
+		<remap from="octomap_point_cloud_centers" to="octomap_point_cloud_centers_merged"/>
+
+		<!-- data source to integrate (PointCloud2) -->
+		<remap from="cloud_in" to="/full_octomap_pc2_merged1" />
+	
+	</node>
+
+</launch>
