@@ -1,5 +1,0 @@
-<launch>
-
-    <node name="initialize_particles_service" pkg="windblade_scanner" type="init_particles_caller.py" output="screen" />
-
-</launch>
