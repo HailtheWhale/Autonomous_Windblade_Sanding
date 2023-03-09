@@ -13,7 +13,7 @@ self-contained and no other repositories' code was modified (although specific c
 ## Contributors to Project 
 
 **Contributors**
-- Donovan Gegg (self.)
+- Donovan Gegg (self)
 - Brenda Hebert 
 - Bailey Smoorenburg
 - Hayden Gemeinhardt
