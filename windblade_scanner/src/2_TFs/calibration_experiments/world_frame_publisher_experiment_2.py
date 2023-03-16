@@ -23,26 +23,27 @@ class WorldPub():
         self.rate = rospy.Rate(loop_rate)
         rospy.on_shutdown(self.shutdown_hook)
         rospy.wait_for_message('/odom',Odometry)
-
+        # Node name
+        self.node_name ="world_frame_publisher/"
         # Parameters
-        # Define test being performed 
-        self.tf_test = int(rospy.get_param("tf_test"))
-        # Define distance from marker for waypoint 
-        # Run 6 experiments. dist = 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8
-        self.waypoint_dist = float(rospy.get_param("waypoint_dist"))
-        # Define number of measurements must be taken before the 
-        # ArUco Marker frames will be set
-        self.min_frames = int(rospy.get_param("min_frames"))
-        # Define angle tolerance 
-        self.waypoint_ang_tol = float(rospy.get_param("waypoint_ang_tol"))
-        # Define Waypoint distance Tolerance 
-        self.waypoint_dist_tol = float(rospy.get_param("waypoint_dist_tol"))
         # Define save directory 
         self.save_dir = str(rospy.get_param("experiment_save_directory"))
+        # Define test being performed 
+        self.tf_test = int(rospy.get_param(self.node_name + "tf_test"))
+        # Define distance from marker for waypoint 
+        # Run 6 experiments. dist = 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8
+        self.waypoint_dist = float(rospy.get_param(self.node_name + "waypoint_dist"))
+        # Define number of measurements must be taken before the 
+        # ArUco Marker frames will be set
+        self.min_frames = int(rospy.get_param(self.node_name + "min_frames"))
+        # Define angle tolerance 
+        self.waypoint_ang_tol = float(rospy.get_param(self.node_name + "waypoint_ang_tol"))
+        # Define Waypoint distance Tolerance 
+        self.waypoint_dist_tol = float(rospy.get_param(self.node_name + "waypoint_dist_tol"))
         # Define topics 
-        self.odom_topic = str(rospy.get_param("odom_topic"))
-        self.fiducial_tf_topic = str(rospy.get_param("fiducial_tf_topic"))
-        self.cmd_vel_topic = str(rospy.get_param("cmd_vel_topic"))
+        self.odom_topic = str(rospy.get_param(self.node_name + "odom_topic"))
+        self.fiducial_tf_topic = str(rospy.get_param(self.node_name + "fiducial_tf_topic"))
+        self.cmd_vel_topic = str(rospy.get_param(self.node_name + "cmd_vel_topic"))
 
         # Transformers
         self.world_tf_broadcaster0 = tf.TransformBroadcaster()

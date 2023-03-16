@@ -23,21 +23,23 @@ class WorldPub():
         self.rate = rospy.Rate(loop_rate)
         rospy.on_shutdown(self.shutdown_hook)
         rospy.wait_for_message('/odom',Odometry)
-
+        # Node name 
+        self.node_name = "world_frame_publisher/"
         # Parameters
         # Define distance from marker for waypoint 
-        self.waypoint_dist = str(rospy.get_param("waypoint_dist"))
+        print(rospy.get_param(self.node_name + "waypoint_dist"))
+        self.waypoint_dist = float(rospy.get_param(self.node_name + "waypoint_dist"))
         # Define number of measurements must be taken before the 
         # ArUco Marker frames will be set
-        self.min_frames = str(rospy.get_param("min_frames"))
+        self.min_frames = int(rospy.get_param(self.node_name + "min_frames"))
         # Define angle tolerance 
-        self.waypoint_ang_tol = str(rospy.get_param("waypoint_ang_tol"))
+        self.waypoint_ang_tol = float(rospy.get_param(self.node_name + "waypoint_ang_tol"))
         # Define Waypoint distance Tolerance 
-        self.waypoint_dist_tol = str(rospy.get_param("waypoint_dist_tol"))
+        self.waypoint_dist_tol = float(rospy.get_param(self.node_name + "waypoint_dist_tol"))
         # Define topics 
-        self.odom_topic = str(rospy.get_param("odom_topic"))
-        self.fiducial_tf_topic = str(rospy.get_param("fiducial_tf_topic"))
-        self.cmd_vel_topic = str(rospy.get_param("cmd_vel_topic"))
+        self.odom_topic = str(rospy.get_param(self.node_name + "odom_topic"))
+        self.fiducial_tf_topic = str(rospy.get_param(self.node_name + "fiducial_tf_topic"))
+        self.cmd_vel_topic = str(rospy.get_param(self.node_name + "cmd_vel_topic"))
 
         # Transformers
         self.world_tf_broadcaster0 = tf.TransformBroadcaster()
@@ -127,7 +129,7 @@ class WorldPub():
         self.bearing_x = 0
         self.bearing_y = 0
         # Close enough to waypoint to do measurements?
-        self.close_enough_dist = 0.7
+        self.close_enough_dist = 0.8
         self.close_enough = False
         self.moving_close_enough = False
         # Transit Close enough Containers 
@@ -579,7 +581,7 @@ class WorldPub():
         # Find the TRUE world frame. Each spin increases the absolute value by 1
         self.spin()
 
-        rospy.loginfo("Experiment complete!")
+        rospy.loginfo("World Frame set!")
 
     #############################################
     # Experimentation Helpers 
@@ -617,7 +619,7 @@ class WorldPub():
                     return False
 
 if __name__ == '__main__':
-    rospy.init_node("world_tf_broadcaster",anonymous=True, log_level=rospy.DEBUG)
+    rospy.init_node("world_frame_publisher",anonymous=True, log_level=rospy.DEBUG)
     world_tf = WorldPub()
     world_tf.waypoint_experiment()
 

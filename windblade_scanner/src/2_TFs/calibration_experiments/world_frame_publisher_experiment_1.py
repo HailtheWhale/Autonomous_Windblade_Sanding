@@ -23,24 +23,25 @@ class WorldPub():
         self.rate = rospy.Rate(loop_rate)
         rospy.on_shutdown(self.shutdown_hook)
         rospy.wait_for_message('/odom',Odometry)
-
+        # Node name
+        self.node_name="world_frame_publisher/"
         # Parameters
         # Define save directory 
         self.save_dir = str(rospy.get_param("experiment_save_directory"))
         # Define angle tolerance 
-        self.waypoint_ang_tol = float(rospy.get_param("waypoint_ang_tol"))
+        self.waypoint_ang_tol = float(rospy.get_param(self.node_name + "waypoint_ang_tol"))
         # Define number of measurements must be taken before moving to next step distance.
-        self.min_frames = int(rospy.get_param("min_frames"))
+        self.min_frames = int(rospy.get_param(self.node_name + "min_frames"))
         # Define Distance to code min, max, step
-        self.dist_meas_min = float(rospy.get_param("dist_meas_min"))
-        self.dist_meas_max = float(rospy.get_param("dist_meas_max"))
-        self.dist_meas_step = float(rospy.get_param("dist_meas_step"))
+        self.dist_meas_min = float(rospy.get_param(self.node_name + "dist_meas_min"))
+        self.dist_meas_max = float(rospy.get_param(self.node_name + "dist_meas_max"))
+        self.dist_meas_step = float(rospy.get_param(self.node_name + "dist_meas_step"))
         # Define marker name 
-        self.aruco_code = str(rospy.get_param("aruco_code"))
+        self.aruco_code = str(rospy.get_param(self.node_name + "aruco_code"))
         # Define topics 
-        self.odom_topic = str(rospy.get_param("odom_topic"))
-        self.fiducial_tf_topic = str(rospy.get_param("fiducial_tf_topic"))
-        self.cmd_vel_topic = str(rospy.get_param("cmd_vel_topic"))
+        self.odom_topic = str(rospy.get_param(self.node_name + "odom_topic"))
+        self.fiducial_tf_topic = str(rospy.get_param(self.node_name + "fiducial_tf_topic"))
+        self.cmd_vel_topic = str(rospy.get_param(self.node_name + "cmd_vel_topic"))
 
         # Transformers
         self.aruco_broadcaster = tf.TransformBroadcaster()

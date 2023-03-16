@@ -22,12 +22,12 @@
 		<!-- Filter workspace -->
 		<param name="filter_ground" value="false"/>
 
-		<param name="pointcloud_min_x" value="-1.0"/>
-		<param name="pointcloud_max_x" value="1.3"/>
-		<param name="pointcloud_min_y" value="0.45"/>
-		<param name="pointcloud_max_y" value="3.85"/>
+		<param name="pointcloud_min_x" value="-0.5"/>
+		<param name="pointcloud_max_x" value="1.6"/>
+		<param name="pointcloud_min_y" value="3.25"/>
+		<param name="pointcloud_max_y" value="6.55"/>
 		<param name="pointcloud_max_z" value="0.85"/>
-		<param name="pointcloud_min_z" value="0.50"/>
+		<param name="pointcloud_min_z" value="0.5"/>
 
 		<!-- Camera 1. Remap Occupied Cells, Free Cells, and Projected Map Topics to allow multiple to run simultaneously. -->
 		<remap from="occupied_cells_vis_array" to="occupied_cells_vis_array_turtlebot"/>

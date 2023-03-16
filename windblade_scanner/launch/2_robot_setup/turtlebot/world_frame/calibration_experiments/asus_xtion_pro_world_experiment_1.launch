@@ -6,34 +6,21 @@
   <arg name="robot" default="turtlebot"/>
   <arg name="save_file_name" default="experiment_1_results.csv"/>
   <!-- Directory to save the data from the experiment -->
-  <arg name="experiment_save_directory" default="$(find windblade_scanner)/experimental_data/$(arg robot)/$(arg save_file_name)"/>
-  <!-- Topic Parameters -->
-  <arg name="odom_topic" default="/odom"/>
-  <arg name="fiducial_tf_topic" default="/fiducial_transforms"/>
-  <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity"/>
-  <!-- Experiment Parameters -->
-  <arg name="waypoint_ang_tol" default="0.05"/>
-  <arg name="min_frames" default="60"/>
-  <arg name="dist_meas_min" default="0.3"/>
-  <arg name="dist_meas_max" default="1.6"/>
-  <arg name="dist_meas_step" default="11"/>
-  <arg name="aruco_code" default="/fiducial_0"/>
+  <param name="experiment_save_directory" value="$(find windblade_scanner)/experimental_data/$(arg robot)/$(arg save_file_name)"/>
 
   <!-- Launches TF publisher for world frame. -->
-  <node pkg="windblade_scanner" type="world_frame_publisher_experiment_1.py" name="world_frame_publisher" output="screen" >
-    <!-- Directory to save the data from the experiment -->
-    <param name="experiment_save_directory" value="$(arg experiment_save_directory)"/>
+  <node pkg="windblade_scanner" type="world_frame_publisher_experiment_1.py" name="world_frame_publisher" output="screen">
     <!-- Topic Parameters -->
-    <param name="odom_topic" value="$(arg odom_topic)"/>
-    <param name="fiducial_tf_topic" value="$(arg fiducial_tf_topic)"/>
-    <param name="cmd_vel_topic" value="$(arg cmd_vel_topic)"/>
+    <param name="odom_topic" value="/odom"/>
+    <param name="fiducial_tf_topic" value="/fiducial_transforms"/>
+    <param name="cmd_vel_topic" value="/mobile_base/commands/velocity"/>
     <!-- Experiment Parameters -->
-    <param name="waypoint_ang_tol" value="$(arg waypoint_ang_tol)"/>
-    <param name="min_frames" value="$(arg min_frames)"/>
-    <param name="dist_meas_min" value="$(arg dist_meas_min)"/>
-    <param name="dist_meas_max" value="$(arg dist_meas_max)"/>
-    <param name="dist_meas_step" value="$(arg dist_meas_step)"/>
-    <param name="aruco_code" value="$(arg aruco_code)"/>
+    <param name="waypoint_ang_tol" value="0.05"/>
+    <param name="min_frames" value="60"/>
+    <param name="dist_meas_min" value="0.3"/>
+    <param name="dist_meas_max" value="1.6"/>
+    <param name="dist_meas_step" value="11"/>
+    <param name="aruco_code" value="/fiducial_0"/>
   </node>
 
 </launch>

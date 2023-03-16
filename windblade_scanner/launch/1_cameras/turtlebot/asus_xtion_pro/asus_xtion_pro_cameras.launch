@@ -3,8 +3,8 @@
   <!-- The ROS stream resulting from launching this should identify these whenever the cameras are plugged into
   The machine -->
 
-  <arg name="camera1_id" default="1d27/0601@1/10" />
-  <arg name="camera2_id" default="1d27/0601@1/11" />
+  <arg name="camera1_id" default="1d27/0601@1/13" />
+  <arg name="camera2_id" default="1d27/0601@1/14" />
   <arg name="depth_registration" default="false" />
  
   <arg name="camera1_name" default="camera1" />

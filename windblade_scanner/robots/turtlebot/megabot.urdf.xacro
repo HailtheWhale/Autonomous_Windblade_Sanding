@@ -10,7 +10,7 @@
   
   <xacro:include filename="$(find turtlebot_description)/urdf/stacks/hexagons.urdf.xacro"/>
   <!-- Cameras with positions and orientations -->
-  <xacro:include filename="$(find windblade_scanner)/urdf/sensor_xtion_pro_camera.urdf.xacro"/>
+  <xacro:include filename="$(find windblade_scanner)/urdf/turtlebot/sensor_xtion_pro_camera.urdf.xacro"/>
 
 
   <!-- Robot Creation -->
