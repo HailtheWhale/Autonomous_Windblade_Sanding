@@ -21,23 +21,26 @@ class directional_driver():
 		'''
 		constructor
 		'''      
-
+		# ROS parameters
+		# Goals
+		self.waypoint_pts = str(rospy.get_param('file'))
 		#Threshold for distance to goal
-		self.goal_th_xy = 0.05
-		self.goal_th_ang = 0.05
-
-		#Point to the first goal
-		self.active_goal = 0
+		self.goal_th_xy = float(rospy.get_param('goal_th_xy'))
+		self.goal_th_ang = float(rospy.get_param('goal_th_ang'))
+		# How many laps?
+		self.desired_laps = int(rospy.get_param('desired_laps'))
+		#Cmd vel speeds 
+		self.turn_spd = float(rospy.get_param('turn_spd'))
+		self.linear_spd = float(rospy.get_param('linear_spd'))
+        # Define topics 
+        self.odom_topic = str(rospy.get_param("odom_topic"))
+        self.cmd_vel_topic = str(rospy.get_param("cmd_vel_topic"))
 
 		#Defining subscriber
-		self.sub = rospy.Subscriber('/odom', Odometry, self.pose_callback)
+		self.sub = rospy.Subscriber(self.odom_topic, Odometry, self.pose_callback)
 
 		#Defining publisher        
-		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size = 10)
-
-		#Cmd vel speeds 
-		self.turn_spd = 0.28
-		self.spd = 0.05
+		self.pub = rospy.Publisher(self.cmd_vel_topic, Twist, queue_size = 10)
 
 		#Defining the velocity message
 		velocity = Twist()
@@ -49,8 +52,8 @@ class directional_driver():
 		velocity.linear.z = 0    
 		self.vmsg = velocity
 
-		# How many laps?
-		self.desired_laps = int(rospy.get_param('laps'))
+		#Point to the first goal
+		self.active_goal = 0
 			
 		# Load  waypoint goals
 		self.load_goals()
@@ -102,8 +105,7 @@ class directional_driver():
 		be forwards. 
 		'''
 		# Getting Waypoint File Path 
-		waypoint_file = rospy.get_param('file')
-		waypoint_file = str(waypoint_file)
+		waypoint_file = self.waypoint_pts
 		# Reading File 
 		df = pd.read_csv(waypoint_file, sep=",", header=None)
 		# Loaded Data

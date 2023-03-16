@@ -25,20 +25,19 @@ class WorldPub():
         rospy.wait_for_message('/odom',Odometry)
 
         # Parameters
-        # Define test being performed 
-        self.tf_test = 2 #int(rospy.get_param('tf_test'))
         # Define distance from marker for waypoint 
-        # Run 6 experiments. dist = 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8
-        self.waypoint_dist = 0.7
+        self.waypoint_dist = str(rospy.get_param("waypoint_dist"))
         # Define number of measurements must be taken before the 
         # ArUco Marker frames will be set
-        self.min_frames = 60
+        self.min_frames = str(rospy.get_param("min_frames"))
         # Define angle tolerance 
-        self.waypoint_ang_tol = 0.08
+        self.waypoint_ang_tol = str(rospy.get_param("waypoint_ang_tol"))
         # Define Waypoint distance Tolerance 
-        self.waypoint_dist_tol = 0.02
-        # Define save directory 
-        self.save_dir = str(rospy.get_param("experiment_save_directory"))
+        self.waypoint_dist_tol = str(rospy.get_param("waypoint_dist_tol"))
+        # Define topics 
+        self.odom_topic = str(rospy.get_param("odom_topic"))
+        self.fiducial_tf_topic = str(rospy.get_param("fiducial_tf_topic"))
+        self.cmd_vel_topic = str(rospy.get_param("cmd_vel_topic"))
 
         # Transformers
         self.world_tf_broadcaster0 = tf.TransformBroadcaster()
@@ -54,10 +53,10 @@ class WorldPub():
         self.tf_listener=tf.TransformListener()
 
         # Subscribers 
-        self.pose_sub = rospy.Subscriber('/odom', Odometry, self.read_position)
-        self.aruco_tf_sub= rospy.Subscriber('/fiducial_transforms',FiducialTransformArray,self.aruco_tf)
+        self.pose_sub = rospy.Subscriber(self.odom_topic, Odometry, self.read_position)
+        self.aruco_tf_sub= rospy.Subscriber(self.fiducial_tf_topic,FiducialTransformArray,self.aruco_tf)
         # Publishers 
-        self.cmd_vel_pub= rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size = 10)
+        self.cmd_vel_pub= rospy.Publisher(self.cmd_vel_topic, Twist, queue_size = 10)
 
         # Orientation
         self.orient_theta = 0 

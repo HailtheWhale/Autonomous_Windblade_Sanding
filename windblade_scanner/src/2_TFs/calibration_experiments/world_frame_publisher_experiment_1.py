@@ -25,30 +25,32 @@ class WorldPub():
         rospy.wait_for_message('/odom',Odometry)
 
         # Parameters
-        # Define tolerances 
-        # Define angle tolerance 
-        self.waypoint_ang_tol = 0.05
-        # Define number of measurements must be taken before moving to next step distance.
-        self.min_frames = 60
-        # Define Distance to code min, max, step
-        self.dist_meas_min = 0.3
-        self.dist_meas_max = 1.6
-        self.dist_meas_step = 11
-        # Define marker name 
-        self.aruco_code = "/fiducial_0"
         # Define save directory 
         self.save_dir = str(rospy.get_param("experiment_save_directory"))
-
+        # Define angle tolerance 
+        self.waypoint_ang_tol = float(rospy.get_param("waypoint_ang_tol"))
+        # Define number of measurements must be taken before moving to next step distance.
+        self.min_frames = int(rospy.get_param("min_frames"))
+        # Define Distance to code min, max, step
+        self.dist_meas_min = float(rospy.get_param("dist_meas_min"))
+        self.dist_meas_max = float(rospy.get_param("dist_meas_max"))
+        self.dist_meas_step = float(rospy.get_param("dist_meas_step"))
+        # Define marker name 
+        self.aruco_code = str(rospy.get_param("aruco_code"))
+        # Define topics 
+        self.odom_topic = str(rospy.get_param("odom_topic"))
+        self.fiducial_tf_topic = str(rospy.get_param("fiducial_tf_topic"))
+        self.cmd_vel_topic = str(rospy.get_param("cmd_vel_topic"))
 
         # Transformers
         self.aruco_broadcaster = tf.TransformBroadcaster()
         self.tf_listener=tf.TransformListener()
 
         # Subscribers 
-        self.pose_sub = rospy.Subscriber('/odom', Odometry, self.read_position)
-        self.aruco_tf_sub= rospy.Subscriber('/fiducial_transforms',FiducialTransformArray,self.aruco_tf)
+        self.pose_sub = rospy.Subscriber(self.odom_topic, Odometry, self.read_position)
+        self.aruco_tf_sub= rospy.Subscriber(self.fiducial_tf_topic,FiducialTransformArray,self.aruco_tf)
         # Publishers 
-        self.cmd_vel_pub= rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size = 10)
+        self.cmd_vel_pub= rospy.Publisher(self.cmd_vel_topic, Twist, queue_size = 10)
 
         # Orientation
         self.orient_theta = 0 
