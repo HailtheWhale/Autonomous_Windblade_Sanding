@@ -1,0 +1,14 @@
+<launch>
+
+  <!-- The waypoint seeker, but can go backwards if specified. -->
+  <arg name="file" default="$(find windblade_scanner)/config/7_waypoints/directional_turtlebot_path.txt"/>
+  <arg name="laps" default="3"/>
+
+  <!-- Set the arguments to parameters -->
+  <param name="file" value="$(arg file)"/>
+  <param name="laps" value="$(arg laps)"/>
+
+  <!-- Turtlebot Driver node -->
+  <node pkg="windblade_scanner" type="directional_driver.py" name="waypoint_seeker" output="screen"/>
+
+</launch>
