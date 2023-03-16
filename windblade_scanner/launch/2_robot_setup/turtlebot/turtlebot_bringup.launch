@@ -1,0 +1,23 @@
+<launch>
+  <!-- Turtlebot_bringup minimal.launch file minus the laptop battery launch and new xacro calls-->
+
+  <!-- Turtlebot -->
+  <arg name="base"              default="$(env TURTLEBOT_BASE)"         doc="mobile base type [create, roomba]"/>
+  <arg name="battery"           default="$(env TURTLEBOT_BATTERY)"      doc="kernel provided locatio for battery info, use /proc/acpi/battery/BAT0 in 2.6 or earlier kernels." />
+  <arg name="simulation"        default="$(env TURTLEBOT_SIMULATION)"   doc="set flags to indicate this turtle is run in simulation mode."/>
+  <arg name="serialport"        default="$(env TURTLEBOT_SERIAL_PORT)"  doc="used by create to configure the port it is connected on [/dev/ttyUSB0, /dev/ttyS0]"/>
+
+  <param name="/use_sim_time" value="$(arg simulation)"/>
+
+  <!-- Looking for file that will call for new xacro -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/turtlebot/robot.launch.xml">
+    <arg name="base" value="$(arg base)" />
+  </include>
+
+  <!-- Launch Turtlebot base stuff. -->
+  <include file="$(find turtlebot_bringup)/launch/includes/mobile_base.launch.xml">
+    <arg name="base" value="$(arg base)" />
+    <arg name="serialport" value="$(arg serialport)" />
+  </include>
+
+</launch>

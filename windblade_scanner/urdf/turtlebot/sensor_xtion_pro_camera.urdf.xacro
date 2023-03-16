@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<robot name="sensor_xtion_pro" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find turtlebot_description)/urdf/turtlebot_gazebo.urdf.xacro"/>
+
+  <!-- Xacro properties -->
+  <xacro:property name="xtion_pro_depth_rel_rgb_py" value="0.0270" />
+  <xacro:property name="xtion_pro_cam_rel_rgb_py"   value="-0.0220" />
+  <!-- To enable the addition of multiple xtion pro cameras 
+       Should be the same as whatever is in the parameter file provided previously. -->
+  <xacro:property name="camera_number" value="1" />
+
+  <!-- xtion_pro_cam_py allows for a camera displaced so the depth optical frame aligns with robot center -->
+  <!-- Needs the camera number, position, and orientation of where the camera is when called. -->
+  <xacro:macro name="sensor_xtion_pro_cam" params="parent xtion_pro_cam_py camera_number xyz rpy">
+
+    <joint name="camera${camera_number}_rgb_joint" type="fixed">
+      <origin xyz="${xyz}"
+              rpy="${rpy}"/>
+      <parent link="${parent}"/>
+      <child link="camera${camera_number}_rgb_frame" />
+    </joint>
+
+    <link name="camera${camera_number}_rgb_frame"/>
+
+    <joint name="camera${camera_number}_rgb_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+      <parent link="camera${camera_number}_rgb_frame" />
+      <child link="camera${camera_number}_rgb_optical_frame" />
+    </joint>
+
+    <link name="camera${camera_number}_rgb_optical_frame"/>
+
+    <joint name="camera${camera_number}_joint" type="fixed">
+      <origin xyz="0 ${xtion_pro_cam_rel_rgb_py} 0"
+              rpy="0 0 0"/>
+      <parent link="camera${camera_number}_rgb_frame"/>
+      <child link="camera${camera_number}_link"/>
+    </joint>
+
+    <link name="camera${camera_number}_link">
+      <visual>
+        <origin xyz="-0.015 0.0035 0.004" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://turtlebot_description/meshes/sensors/xtion_pro_camera.dae"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+        <geometry>
+        <box size="0.0730 0.2760 0.0720"/>
+      </geometry>
+      </collision>
+
+      <inertial>
+        <mass value="0.170" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="0.001152600" ixy="0.0" ixz="0.0"
+                 iyy="0.000148934" iyz="0.0"
+                 izz="0.001154654" />
+      </inertial>
+    </link>
+
+    <joint name="camera${camera_number}_depth_joint" type="fixed">
+      <origin xyz="0 ${xtion_pro_depth_rel_rgb_py} 0" rpy="0 0 0" />
+      <parent link="camera${camera_number}_rgb_frame" />
+      <child link="camera${camera_number}_depth_frame" />
+    </joint>
+
+    <link name="camera${camera_number}_depth_frame"/>
+
+    <joint name="camera${camera_number}_depth_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+      <parent link="camera${camera_number}_depth_frame" />
+      <child link="camera${camera_number}_depth_optical_frame" />
+    </joint>
+
+    <link name="camera${camera_number}_depth_optical_frame"/>
+
+    <!-- RGBD sensor for simulation, same as Kinect -->
+    <xacro:turtlebot_sim_3dsensor/>
+
+    <!-- Asus mount -->
+    <joint name="mount_xtion_pro${camera_number}_joint" type="fixed">
+      <origin xyz="-0.1024 0.0 0.272" rpy="0 0 0"/>
+      <parent link="${parent}"/>
+      <child link="mount_xtion_pro${camera_number}_link"/>
+    </joint>  
+
+    <link name="mount_xtion_pro${camera_number}_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${-M_PI/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://turtlebot_description/meshes/sensors/xtion_pro_stack.dae"/>
+        </geometry>
+      </visual>  
+      <collision>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+        <geometry>
+        <box size="0.0330 0.2760 0.0120"/>
+      </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.170" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="0.001152600" ixy="0.0" ixz="0.0"
+                 iyy="0.000148934" iyz="0.0"
+                 izz="0.001154654" />
+      </inertial>
+    </link>
+
+  </xacro:macro>
+
+</robot>

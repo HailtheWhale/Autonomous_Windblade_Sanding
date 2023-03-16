@@ -1,0 +1,16 @@
+<launch>
+  <!-- Launch AruCo Detect Qr code stuff -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/turtlebot/world_frame/asus_xtion_pro/asus_xtion_pro_aruco_detect_qr2.launch"/>
+  
+  <arg name="save_file_name" default="experiment_1_results.csv"/>
+  <arg name="robot" default="turtlebot"/>
+
+  <!-- Directory to save the data from the experiment -->
+  <param name="experiment_save_directory" value="$(find windblade_scanner)/experimental_data/$(arg robot)/$(arg save_file_name)"/>
+
+  <!-- Launches TF publisher for world frame. -->
+  <node pkg="windblade_scanner" type="world_frame_publisher_experiment_1.py" name="world_frame_publisher" output="screen" >
+
+  </node>
+
+</launch>
