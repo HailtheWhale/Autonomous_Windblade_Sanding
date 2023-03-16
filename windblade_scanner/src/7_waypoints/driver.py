@@ -25,25 +25,28 @@ class driver(object):
 		rospy.init_node('waypoint_seeker', log_level=rospy.DEBUG)        
 
 		# ROS parameters
+		# Node name 
+		self.node_name = "waypoint_seeker/"
+		# ROS parameters
 		# Goals
-		self.waypoint_pts = str(rospy.get_param('file'))
+		self.waypoint_pts = str(rospy.get_param('waypoint_file'))
 		#Threshold for distance to goal
-		self.goal_th_xy = float(rospy.get_param('goal_th_xy'))
-		self.goal_th_ang = float(rospy.get_param('goal_th_ang'))
+		self.goal_th_xy = float(rospy.get_param(self.node_name + 'goal_th_xy'))
+		self.goal_th_ang = float(rospy.get_param(self.node_name + 'goal_th_ang'))
 		# How many laps?
-		self.desired_laps = int(rospy.get_param('desired_laps'))
+		self.desired_laps = int(rospy.get_param(self.node_name + 'desired_laps'))
 		#Cmd vel speeds 
-		self.turn_spd = float(rospy.get_param('turn_spd'))
-		self.linear_spd = float(rospy.get_param('linear_spd'))
-        # Define topics 
-        self.odom_topic = str(rospy.get_param("odom_topic"))
-        self.cmd_vel_topic = str(rospy.get_param("cmd_vel_topic"))
+		self.turn_spd = float(rospy.get_param(self.node_name + 'turn_spd'))
+		self.linear_spd = float(rospy.get_param(self.node_name + 'linear_spd'))
+		# Define topics 
+		self.odom_topic = str(rospy.get_param(self.node_name + "odom_topic"))
+		self.cmd_vel_topic = str(rospy.get_param(self.node_name + "cmd_vel_topic"))
 
 		#Defining subscriber
-		self.sub = rospy.Subscriber('/odom', Odometry, self.pose_callback)
+		self.sub = rospy.Subscriber(self.odom_topic, Odometry, self.pose_callback)
 
 		#Defining publisher        
-		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size = 10)
+		self.pub = rospy.Publisher(self.cmd_vel_topic, Twist, queue_size = 10)
 
 		#Defining the velocity message
 		velocity = Twist()

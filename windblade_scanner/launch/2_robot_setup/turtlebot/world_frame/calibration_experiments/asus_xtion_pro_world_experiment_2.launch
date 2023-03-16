@@ -6,32 +6,20 @@
   <arg name="robot" default="turtlebot"/>
   <arg name="save_file_name" default="experiment_2_results9.csv"/>
   <!-- Directory to save the data from the experiment -->
-  <arg name="experiment_save_directory" default="$(find windblade_scanner)/experimental_data/$(arg robot)/$(arg save_file_name)"/>
-  <!-- Topic Parameters -->
-  <arg name="odom_topic" default="/odom"/>
-  <arg name="fiducial_tf_topic" default="/fiducial_transforms"/>
-  <arg name="cmd_vel_topic" default="/mobile_base/commands/velocity"/>
-  <!-- Experiment Parameters -->
-  <arg name="tf_test" default="2"/>
-  <arg name="waypoint_dist" default="1.1"/>
-  <arg name="min_frames" default="60"/>
-  <arg name="waypoint_ang_tol" default="0.08"/>
-  <arg name="waypoint_dist_tol" default="0.02"/>
+  <param name="experiment_save_directory" value="$(find windblade_scanner)/experimental_data/$(arg robot)/$(arg save_file_name)"/>
 
   <!-- Launches TF publisher for world frame. -->
   <node pkg="windblade_scanner" type="world_frame_publisher_experiment_2.py" name="world_frame_publisher" output="screen" >
-    <!-- Directory to save the data from the experiment -->
-    <param name="experiment_save_directory" value="$(arg experiment_save_directory)"/>
     <!-- Topic Parameters -->
-    <param name="odom_topic" value="$(arg odom_topic)"/>
-    <param name="fiducial_tf_topic" value="$(arg fiducial_tf_topic)"/>
-    <param name="cmd_vel_topic" value="$(arg cmd_vel_topic)"/>
+    <param name="odom_topic" value="/odom"/>
+    <param name="fiducial_tf_topic" value="/fiducial_transforms"/>
+    <param name="cmd_vel_topic" value="/mobile_base/commands/velocity"/>
     <!-- Experiment Parameters -->
-    <param name="tf_test" default="$(arg tf_test)"/>
-    <param name="waypoint_dist" default="$(arg waypoint_dist)"/>
-    <param name="min_frames" default="$(arg min_frames)"/>
-    <param name="waypoint_ang_tol" default="$(arg waypoint_ang_tol)"/>
-    <param name="waypoint_dist_tol" default="$(arg waypoint_dist_tol)"/>
+    <param name="tf_test" value="2"/>
+    <param name="waypoint_dist" value="1.1"/>
+    <param name="min_frames" value="60"/>
+    <param name="waypoint_ang_tol" value="0.08"/>
+    <param name="waypoint_dist_tol" value="0.02"/>
   </node>
 
 </launch>
