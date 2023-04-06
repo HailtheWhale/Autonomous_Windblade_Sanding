@@ -53,42 +53,6 @@
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>rospy</exec_depend>
 
-  <build_depend>rospy</build_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <exec_depend>rospy</exec_depend>
-
-  <build_depend>openni2_launch</build_depend>
-  <build_export_depend>openni2_launch</build_export_depend>
-  <exec_depend>openni2_launch</exec_depend>
-
-  <build_depend>zed_wrapper</build_depend>
-  <build_export_depend>zed_wrapper</build_export_depend>
-  <exec_depend>zed_wrapper</exec_depend>
-
-  <build_depend>aruco_detect</build_depend>
-  <build_export_depend>aruco_detect</build_export_depend>
-  <exec_depend>aruco_detect</exec_depend>
-
-  <build_depend>octomap_server</build_depend>
-  <build_export_depend>octomap_server</build_export_depend>
-  <exec_depend>octomap_server</exec_depend>
-
-  <build_depend>rospy</build_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <exec_depend>rospy</exec_depend>
-
-  <build_depend>octomap_merger</build_depend>
-  <build_export_depend>octomap_merger</build_export_depend>
-  <exec_depend>octomap_merger</exec_depend>
-
-  <build_depend>map_server</build_depend>
-  <build_export_depend>map_server</build_export_depend>
-  <exec_depend>map_server</exec_depend>
-
-  <build_depend>amcl</build_depend>
-  <build_export_depend>amcl</build_export_depend>
-  <exec_depend>amcl</exec_depend>
-
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

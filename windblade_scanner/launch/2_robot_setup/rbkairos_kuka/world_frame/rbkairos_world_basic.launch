@@ -1,0 +1,14 @@
+<launch>
+  <!-- Launch AruCo Detect Qr code stuff -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/rbkairos_kuka/world_frame/rbkairos_aruco_detect_qr.launch"/>
+  <!-- Launches TF publisher for world frame. -->
+  <node pkg="windblade_scanner" type="world_frame_publisher_basic.py" name="world_frame_publisher" output="screen" >
+    <!-- Topic Parameters -->
+    <param name="fiducial_tf_topic" value="/robot/fiducial_transforms"/>
+    <!-- Frame Parameters -->
+    <param name="odom_frame" value="/robot_odom"/>
+    <!-- World Frame Parameters -->
+    <param name="min_frames" value="60"/>
+  </node>
+  
+</launch>

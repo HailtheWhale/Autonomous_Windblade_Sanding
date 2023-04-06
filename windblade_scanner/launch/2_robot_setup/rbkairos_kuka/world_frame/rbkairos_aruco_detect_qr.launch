@@ -12,7 +12,7 @@
   <arg name="verbose" default="false"/>
 
   <node pkg="aruco_detect" name="aruco_detect"
-    type="aruco_detect" output="screen" respawn="false">
+    type="aruco_detect" ns="robot" output="screen" respawn="false">
     <param name="image_transport" value="$(arg transport)"/>
     <param name="publish_images" value="true" />
     <param name="fiducial_len" value="$(arg fiducial_len)"/>
@@ -24,7 +24,7 @@
     <param name="verbose" value="$(arg verbose)"/>
     <param name="adaptiveThreshWinSizeMax" value="70"/>
     <remap from="camera/compressed" 
-        to="/zed2i/zed_node/rgb_raw/image_raw_color/$(arg transport)"/>
-    <remap from="camera_info" to="/zed2i/zed_node/rgb_raw/camera_info"/>
+        to="/robot/front_rgbd_camera/rgb/image_raw/compressed"/>
+    <remap from="camera_info" to="/robot/front_rgbd_camera/rgb/camera_info"/>
   </node>
 </launch>

@@ -22,7 +22,6 @@ class WorldPub():
         # Safety 
         self.rate = rospy.Rate(loop_rate)
         rospy.on_shutdown(self.shutdown_hook)
-        rospy.wait_for_message('/odom',Odometry)
         # Node name 
         self.node_name = "world_frame_publisher/"
         # Parameters
@@ -40,6 +39,9 @@ class WorldPub():
         self.odom_topic = str(rospy.get_param(self.node_name + "odom_topic"))
         self.fiducial_tf_topic = str(rospy.get_param(self.node_name + "fiducial_tf_topic"))
         self.cmd_vel_topic = str(rospy.get_param(self.node_name + "cmd_vel_topic"))
+        # Define odometry TF frame 
+        self.odom_frame = str(rospy.get_param(self.node_name + "odom_frame"))
+
 
         # Transformers
         self.world_tf_broadcaster0 = tf.TransformBroadcaster()
@@ -75,8 +77,8 @@ class WorldPub():
         self.cmd_vel.linear.z=0
 
         # Turning and linear spds 
-        self.turn_spd = 0.13
-        self.linear_spd = 0.05
+        self.turn_spd = 0.0
+        self.linear_spd = 0.0
 
         # Finished turning
         self.finished_turning = False
@@ -219,10 +221,10 @@ class WorldPub():
             waypoint_frame = "/fiducial_0"
             try: 
                 # TF From the odometry to the Waypoint 1 ArUco Marker 
-                self.tf_listener.waitForTransform(waypoint_frame,"/odom",rospy.Time(0),rospy.Duration(0.5))
+                self.tf_listener.waitForTransform(waypoint_frame,self.odom_frame,rospy.Time(0),rospy.Duration(0.5))
 
                 # TF From the base_link to the qr code
-                (trans,rot)=self.tf_listener.lookupTransform("/odom",waypoint_frame,rospy.Time(0))
+                (trans,rot)=self.tf_listener.lookupTransform(self.odom_frame,waypoint_frame,rospy.Time(0))
 
                 # Copying values.Most distortion in roll and pitch, so discarding. 
                 x1,y1,z1 = trans
@@ -276,7 +278,7 @@ class WorldPub():
             # If Not set up the offset waypoint yet, do it. 
             if not self.waypoint_aruco_set:
                 # Recreate ArUco Marker 
-                parent_frame = "/odom"
+                parent_frame = self.odom_frame
                 child_frame ="/aruco_0"
                 self.aruco_broadcaster.sendTransform((self.waypoint_tf_pose_x,self.waypoint_tf_pose_y,0), 
                 (self.waypoint_tf_orient_x,self.waypoint_tf_orient_y,self.waypoint_tf_orient_z,self.waypoint_tf_orient_w), 
@@ -288,7 +290,7 @@ class WorldPub():
                 self.intermediate_broadcaster.sendTransform((0,self.waypoint_dist,0), (0,0,0,1), rospy.Time.now(), child_frame, parent_frame)
                 # Lookup the new transfrom from the odom to the waypoint. Update the waypoint info. 
                 try: 
-                    [trans,rot]=self.tf_listener.lookupTransform("/odom","/waypoint_1",rospy.Time(0))
+                    [trans,rot]=self.tf_listener.lookupTransform(self.odom_frame,"/waypoint_1",rospy.Time(0))
                     x1,y1,z1 = trans
                     ox1,oy1,oz1,ow1 = rot
                     self.waypoint_tf_pose_x = x1
@@ -310,11 +312,11 @@ class WorldPub():
             world_frame = "/fiducial_0"
             try: 
                 # TF From the odometry to the Waypoint 0 ArUco Marker 
-                self.tf_listener.waitForTransform(world_frame,"/odom",rospy.Time(0),rospy.Duration(0.5))
+                self.tf_listener.waitForTransform(world_frame,self.odom_frame,rospy.Time(0),rospy.Duration(0.5))
                 rospy.loginfo_once("World Frame Found! Recording....")
 
                 # TF From the base_link to the qr code
-                (trans,rot)=self.tf_listener.lookupTransform("/odom",world_frame,rospy.Time(0))
+                (trans,rot)=self.tf_listener.lookupTransform(self.odom_frame,world_frame,rospy.Time(0))
 
                 # Copying values.Most distortion in roll and pitch, so discarding. 
                 xw,yw,zw = trans
@@ -404,14 +406,14 @@ class WorldPub():
         # Publishes based on if the frame is available or not. 
         if self.world_aruco_set_base:
             # Sends the QR Code TF
-            parent_frame = "odom"
+            parent_frame = self.odom_frame
             child_frame = "world_0"
             self.world_tf_broadcaster0.sendTransform((self.world_tf_pose_x_base, self.world_tf_pose_y_base, 0), 
                                                 (self.waypoint_tf_orient_x0,self.waypoint_tf_orient_y0,self.waypoint_tf_orient_z0,
                                                 self.waypoint_tf_orient_w0), rospy.Time.now(), child_frame, parent_frame)
         if self.world_aruco_set_true:
             # Sends the QR Code TF
-            parent_frame = "odom"
+            parent_frame = self.odom_frame
             child_frame = "world"
             self.world_tf_broadcaster1.sendTransform((self.world_tf_pose_x_true, self.world_tf_pose_y_true, 0), 
                                                 (self.waypoint_tf_orient_x,self.waypoint_tf_orient_y,self.waypoint_tf_orient_z,
@@ -419,7 +421,7 @@ class WorldPub():
     def waypoint_publisher(self):
         # Publishes the waypoints if calculated. 
         if self.waypoint_aruco_set:
-                parent_frame = "/odom"
+                parent_frame = self.odom_frame
                 child_frame = "/waypoint_1"
                 self.waypoint1_broadcaster.sendTransform((self.waypoint_tf_pose_x,self.waypoint_tf_pose_y,0),
                 (self.waypoint_tf_orient_x,self.waypoint_tf_orient_y,self.waypoint_tf_orient_z,self.waypoint_tf_orient_w),
@@ -430,12 +432,12 @@ class WorldPub():
         marker_seeking = "/fiducial_0"
         if not self.close_enough:
             try: 
-                [trans,rot]=self.tf_listener.lookupTransform("/odom",marker_seeking,rospy.Time(0))
+                [trans,rot]=self.tf_listener.lookupTransform(self.odom_frame,marker_seeking,rospy.Time(0))
                 x, y, z = trans
                 ox,oy,oz,ow = rot
                 # Pass lookup through odometry so that odometry can be considered for distance comparisons. 
                 # Sends the QR Code TF
-                parent_frame = "odom"
+                parent_frame = self.odom_frame
                 child_frame = "aruco_seeking"
                 self.aruco_broadcaster.sendTransform((x, y, 0), 
                                                     (ox,oy,oz,ow), rospy.Time.now(), child_frame, parent_frame)  
@@ -445,7 +447,7 @@ class WorldPub():
             rospy.logwarn("No listed marker found! Marker provided was %s. Close enough to Marker 1? %s.", marker_seeking, self.close_enough)
 
     ###############################################
-    # Experimentation Movements 
+    # Movements 
     ###############################################            
 
     def spin(self, frame_seeking="world"):
@@ -453,9 +455,10 @@ class WorldPub():
         self.finished_turning = False
         self.started_rot = False
 
-        turn_spd = -self.turn_spd
+        turn_spd = self.turn_spd
 
         while not self.started_rot:
+	    self.cmd_vel.linear.x = 0.0		
             self.cmd_vel.angular.z = turn_spd
             self.cmd_vel_pub.publish(self.cmd_vel)
             #rospy.logdebug("Starting Rotation...")
@@ -467,6 +470,7 @@ class WorldPub():
             #rospy.logdebug("NOT DONE SPINNING")
 
             # Rotate
+	    self.cmd_vel.linear.x = 0.0		
             self.cmd_vel.angular.z = turn_spd
             self.cmd_vel_pub.publish(self.cmd_vel)
 
@@ -486,13 +490,14 @@ class WorldPub():
             # In transit to waypoints 
             elif frame_seeking == 1:
                 try:
-                    self.tf_listener.waitForTransform("/fiducial_0","/odom",rospy.Time(0),rospy.Duration(0.5))
+                    self.tf_listener.waitForTransform("/fiducial_0",self.odom_frame,rospy.Time(0),rospy.Duration(0.5))
                     self.finished_turning = True
                 except:
                     rospy.logwarn("Frame 1 not in view!")
 
         # Stop robot 
         self.cmd_vel.angular.z = 0
+	self.cmd_vel.linear.x = 0.0
         self.cmd_vel_pub.publish(self.cmd_vel)
 
     def traveler(self, found_bearing = False, close_enough = True, close_enough_dist = 0.25):
@@ -564,10 +569,10 @@ class WorldPub():
             return True 
 
 ######################################################
-# Experiment
+# World Setter
 ######################################################
 
-    def waypoint_experiment(self):
+    def world_setter(self):
         # Find 1st World frame 
         self.spin()
 #################################################
@@ -604,7 +609,7 @@ class WorldPub():
                 # Need to spin until the marker seeking is within view. 
                 if abs(self.waypoint) == 1:
                     try:
-                        self.tf_listener.waitForTransform("/fiducial_0","/odom",rospy.Time(0),rospy.Duration(0.5))
+                        self.tf_listener.waitForTransform("/fiducial_0",self.odom_frame,rospy.Time(0),rospy.Duration(0.5))
                     except:
                         self.spin(frame_seeking=self.waypoint)                           
                 try:
@@ -621,7 +626,7 @@ class WorldPub():
 if __name__ == '__main__':
     rospy.init_node("world_frame_publisher",anonymous=True, log_level=rospy.DEBUG)
     world_tf = WorldPub()
-    world_tf.waypoint_experiment()
+    world_tf.world_setter()
 
     while not rospy.is_shutdown():
         try:
