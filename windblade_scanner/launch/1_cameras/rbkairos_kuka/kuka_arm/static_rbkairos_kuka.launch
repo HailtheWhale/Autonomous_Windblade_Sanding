@@ -1,0 +1,7 @@
+<launch>
+
+  <!-- Launches TF publisher for world frame. -->
+  <node pkg="windblade_scanner" type="static_kuka_tf_publisher.py" ns="windblade_scanner" name="static_kuka_tf_publisher" output="screen" >
+  </node>
+  
+</launch>

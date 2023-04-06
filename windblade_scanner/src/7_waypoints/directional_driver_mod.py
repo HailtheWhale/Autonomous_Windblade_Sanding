@@ -17,13 +17,14 @@ from tf.transformations import euler_from_quaternion
 
 class directional_driver():
     
-	def __init__(self):
+	def __init__(self,robot="turtlebot", node_name="waypoint_seeker/"):
 		'''
 		constructor
 		'''      
 		# Node name 
-		self.node_name = "waypoint_seeker/"
+		self.node_name = node_name
 		# ROS parameters
+		self.robot = robot
 		# Goals
 		self.waypoint_pts = str(rospy.get_param('waypoint_file'))
 		#Threshold for distance to goal
@@ -40,7 +41,6 @@ class directional_driver():
 
 		#Defining subscriber
 		self.sub = rospy.Subscriber(self.odom_topic, Odometry, self.pose_callback)
-
 		#Defining publisher        
 		self.pub = rospy.Publisher(self.cmd_vel_topic, Twist, queue_size = 10)
 
@@ -304,8 +304,13 @@ class directional_driver():
 			print("Ang diff", ang_diff)
 			print("Distance to goal:", self.dist_to_goal_xy())
 			print("ON GOAL:",self.active_goal)
-
-			vel_scalar = 1.0
+			if robot == "rbkairos":
+				if self.active_goal in [3,4,7,8]:
+					vel_scalar = 3.0
+				else:
+					vel_scalar = 1.0
+			else:
+				vel_scalar = 1.0
 			# If outside the angle threshold, Reorient self.
 			if abs(ang_diff) >  self.goal_th_ang:
 				# If the difference between the needed angle and the current angle is negative
@@ -327,8 +332,12 @@ class directional_driver():
 					self.vmsg.linear.x = self.linear_spd/vel_scalar
 			# Else, move forward. 
 			else:
-				self.vmsg.angular.z = 0
-				self.vmsg.linear.x = self.linear_spd
+				if self.robot == "rbkairos":
+					self.vmsg.angular.z = 0
+					self.vmsg.linear.x = self.linear_spd/vel_scalar
+				else:
+					self.vmsg.angular.z = 0
+					self.vmsg.linear.x = self.linear_spd
 
 		# Within x,y tolerance. Spin to desired bearing. 
 		else:
@@ -339,8 +348,10 @@ class directional_driver():
 
 if __name__ == '__main__':
 	rospy.init_node("direction_waypoint_seeker",anonymous=True, log_level=rospy.INFO)
+	node_name="waypoint_seeker/"
+	robot = str(rospy.get_param(node_name + 'robot'))
 	try:
-		pilot = directional_driver()
+		pilot = directional_driver(robot=robot,node_name=node_name)
 		pilot.load_goals()
 		pilot.drive()
 			

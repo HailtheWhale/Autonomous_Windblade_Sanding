@@ -1,0 +1,13 @@
+<launch>
+
+  <!-- Waypoint Driver node -->
+  <node pkg="windblade_scanner" type="rbkairos_kuka_spin_debug.py" name="windblade_rbkairos_kuka_debugger" output="screen" ns="windblade_project">
+    <!-- Set the arguments to parameters -->
+    <param name="turn_spd" value="0.3"/>
+    <param name="linear_spd" value="0.05"/>
+    <!-- Define topics -->
+    <param name="odom_topic" value="/robot/robotnik_base_control/odom"/>
+    <param name="cmd_vel_topic" value="/robot/cmd_vel"/>
+  </node>
+
+</launch>

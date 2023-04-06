@@ -1,21 +1,19 @@
 <launch>
   <!-- Launch AruCo Detect Qr code stuff -->
-  <arg name="camera_num" default="2"/>
-  <include file="$(find windblade_scanner)/launch/2_robot_setup/turtlebot/world_frame/asus_xtion_pro/asus_xtion_pro_aruco_detect_qr$(arg camera_num).launch"/>
 
   <!-- Launches TF publisher for world frame. -->
   <node pkg="windblade_scanner" type="world_frame_publisher.py" name="world_frame_publisher" output="screen" >
     <!-- Topic Parameters -->
-    <param name="odom_topic" value="/odom"/>
-    <param name="fiducial_tf_topic" value="/fiducial_transforms"/>
-    <param name="cmd_vel_topic" value="/mobile_base/commands/velocity"/>
+    <param name="odom_topic" value="/robot/robotnik_base_control/odom"/>
+    <param name="fiducial_tf_topic" value="/robot/fiducial_transforms"/>
+    <param name="cmd_vel_topic" value="/robot/move_base/cmd_vel"/>
     <!-- Frame Parameters -->
-    <param name="odom_frame" value="/odom"/>
+    <param name="odom_frame" value="/robot_odom"/>
     <!-- World Frame Parameters -->
     <param name="waypoint_dist" value="0.8"/>
     <param name="min_frames" value="60"/>
     <param name="waypoint_ang_tol" value="0.08"/>
     <param name="waypoint_dist_tol" value="0.02"/>
   </node>
-
+  
 </launch>

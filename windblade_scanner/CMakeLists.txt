@@ -9,13 +9,6 @@ project(windblade_scanner)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  openni2_launch
-  zed_wrapper
-  aruco_detect
-  octomap_server
-  octomap_merger
-  map_server
-  amcl
 )
 
 ## System dependencies are found with CMake's conventions
