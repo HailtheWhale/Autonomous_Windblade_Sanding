@@ -2,9 +2,7 @@
 
   <!-- Getting the Octomap msg into the Octomap merger custom msg type. -->
   <node pkg="windblade_scanner" type="octomap_3d_map_msg_converter.py" name="loaded_octomap_map_msg_converter" output="screen">
-    <remap from="/octomap_binary" to="/octomap_binary_loaded_map"/>
     <remap from="/octomap_full" to="/octomap_full_loaded_map"/>
-    <remap from="/binary_neighbors_topic" to="/binary_neighbors_topic_loaded_map"/>
     <remap from="/full_neighbors_topic" to="/full_neighbors_topic_loaded_map"/>
   </node>
   
@@ -14,18 +12,27 @@
   <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_mergers/binary_map_update_merger.launch"/>
   -->
   <!--Map and Camera Full (ASUS) Merge Launch-->
+  <!--
   <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_mergers/full_map_update_merger.launch"/>
+  -->
+
+  <!--Map and Camera Full (Zed2i) Merge Launch-->
+  <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_mergers/zed2i/zed2i_full_map_update_merger.launch"/>
+
+  <!-- Getting the Octomap msg into the Octomap merger custom msg type. -->
+  <node pkg="windblade_scanner" type="octomap_3d_map_msg_converter.py" name="rbkairos_octomap_map_msg_converter" output="screen">
+    <remap from="/octomap_full" to="/octomap_full_rbkairos"/>
+    <remap from="/full_neighbors_topic" to="/full_neighbors_topic_rbkairos"/>
+  </node>
 
   <!-- Making a service based on the merged msg which will allow merged map saving.-->
   <node pkg="windblade_scanner" type="merged_service_provider.py" name="octomap_merged_service_provider" output="screen">
-    <remap from="/binary_merged_octomap" to="/binary_octomap_updated"/>
     <remap from="/full_merged_octomap" to="/full_octomap_updated"/>
-    <remap from="/octomap_binary_merged" to="/octomap_binary_updated"/>
     <remap from="/octomap_full_merged" to="/octomap_full_updated"/>
   </node>
 
   <!-- For visualization -->
-  <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_loaders/octotopic_loader.launch"/>
+  <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_loaders/rbkairos_kuka/zed2i_octotopic_loader.launch"/>
 
 </launch>
 

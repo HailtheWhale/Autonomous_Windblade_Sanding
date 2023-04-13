@@ -17,7 +17,7 @@ from nav_msgs.msg import Odometry
 
 class WorldPub():
 
-    def __init__(self, loop_rate=5.0):
+    def __init__(self, loop_rate=10000.0):
 
         # Safety 
         self.rate = rospy.Rate(loop_rate)
@@ -166,5 +166,6 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         try:
             world_tf.world_publisher()
+	    world_tf.rate.sleep()
         except rospy.ROSInterruptException:
             world_tf.shutdown_hook()

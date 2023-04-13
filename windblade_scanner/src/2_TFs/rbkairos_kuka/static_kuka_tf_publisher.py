@@ -17,7 +17,7 @@ from nav_msgs.msg import Odometry
 
 class StaticArm():
 
-    def __init__(self, loop_rate=5.0):
+    def __init__(self, loop_rate=500.0):
 
         # Safety 
         self.rate = rospy.Rate(loop_rate)
@@ -43,6 +43,8 @@ class StaticArm():
         self.arm_tf_broadcaster56 = tf.TransformBroadcaster()
         self.arm_tf_broadcaster67 = tf.TransformBroadcaster()
         self.arm_tf_broadcaster7ee = tf.TransformBroadcaster()
+
+	self.arm_tf_listener=tf.TransformListener()
 
 ###############################################################
 # Helper Functions 
@@ -73,7 +75,7 @@ class StaticArm():
         ########################
         parent_frame_base0 = "robot_base_link"
         child_frame_base0 = "static_arm_link_0"
-        trans_base0 = (0.192,0.0,0.562)
+        trans_base0 = (0.192,0.0,0.467)
         quat_base0 = self.euler_to_quat(0.0,0.0,0.0)
 
         self.arm_tf_broadcaster01.sendTransform(trans_base0, 
@@ -162,10 +164,23 @@ class StaticArm():
         parent_frame_7ee = "static_arm_link_7"
         child_frame_7ee = "static_arm_link_ee"
         trans_7ee = (0.0,0.0,0.171)
-        quat_7ee = self.euler_to_quat(0.0,-1.521,1.471)
+        quat_7ee = self.euler_to_quat(0.0,0.07,0.0)
 
         self.arm_tf_broadcaster7ee.sendTransform(trans_7ee, 
                                             quat_7ee, rospy.Time.now(), child_frame_7ee, parent_frame_7ee)
+
+
+    def full_lookup(self):
+	########################
+	# FULL Lookup, to make a singular static TF for use
+	########################
+	parent_frame_full = "robot_base_link"
+	child_frame_full = "static_arm_link_ee"
+        self.arm_tf_listener.waitForTransform(parent_frame_full,child_frame_full,rospy.Time(0),rospy.Duration(0.50))
+	(trans,rot) = self.arm_tf_listener.lookupTransform(parent_frame_full, child_frame_full, rospy.Time(0))
+	x,y,z,w = rot
+	[roll,pitch,yaw] = self.quat_to_euler(x, y, z, w)
+	print(trans,[roll,pitch,yaw])
 
 if __name__ == '__main__':
     rospy.init_node("static_kuka_tf_publisher",anonymous=True, log_level=rospy.DEBUG)
@@ -174,5 +189,10 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         try:
             arm_tf.static_arm_publisher()
+	    try:
+	    	arm_tf.full_lookup()
+	    except:
+		print("lookup failed")
+	    	arm_tf.rate.sleep()
         except rospy.ROSInterruptException:
             arm_tf.shutdown_hook()

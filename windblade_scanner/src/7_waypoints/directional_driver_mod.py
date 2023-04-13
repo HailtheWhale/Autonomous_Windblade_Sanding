@@ -307,6 +307,8 @@ class directional_driver():
 			if robot == "rbkairos":
 				if self.active_goal in [3,4,7,8]:
 					vel_scalar = 3.0
+				elif self.active_goal in [5,6,9]:
+					vel_scalar = 2.0
 				else:
 					vel_scalar = 1.0
 			else:

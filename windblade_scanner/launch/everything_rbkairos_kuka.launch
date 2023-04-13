@@ -1,0 +1,14 @@
+<launch>
+
+  <!-- Launch World Frame Finder. -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/rbkairos_kuka/world_frame/rbkairos_world_basic.launch"/>
+  <!-- Launch Static TF Publisher. -->
+  <include file="$(find windblade_scanner)/launch/1_cameras/rbkairos_kuka/kuka_arm/static_rbkairos_kuka.launch"/>
+  
+  <!-- Zed2i launched from other laptop. -->
+
+  <!-- Merge Octomaps. -->
+<!--
+  <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_mergers/map_update_merger_full.launch"/>
+-->
+</launch>
