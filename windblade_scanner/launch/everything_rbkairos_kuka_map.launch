@@ -1,0 +1,11 @@
+<launch> 
+
+ <!-- Launch RVIZ -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find windblade_scanner)/rviz/rbkairos_kuka/arm_test.rviz"/>
+
+  <!-- Load Turtlebot's Octomap. -->
+  <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_loaders/octomap_loader.launch"/>
+
+  <!-- Launch zed2i's Octomap. -->
+  <include file="$(find windblade_scanner)/launch/4_octomap/rbkairos_kuka/zed_2i/zed2i_octomap_mapping.launch"/>
+</launch>

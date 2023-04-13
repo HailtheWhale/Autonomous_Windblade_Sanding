@@ -21,55 +21,18 @@ class MergedOctoMapServiceProvider():
         rospy.loginfo("Waiting for merged octomap binary and/or full topics...")
         rospy.logwarn("If nothing seems to be happening, check the script's subscribed Octomap topics.")
         rospy.logwarn("Ensure that the octomap merger is running. It provides the topics needed.")
-        self.merge_type = rospy.get_param('merge_type')
-        if (self.merge_type == "both"):
-            rospy.wait_for_message('/binary_merged_octomap',Octomap)
-            rospy.wait_for_message('/full_merged_octomap',Octomap)
-        elif (self.merge_type == "binary"):
-            rospy.wait_for_message('/binary_merged_octomap',Octomap)
-        else:
-            rospy.wait_for_message('/full_merged_octomap',Octomap)
 
         rospy.loginfo("Topic(s) found. Converting them for the Octomap merger.")
 
-        # Variables based on what's being called 
-        if (self.merge_type == "both"):
-            self.binary_sub=rospy.Subscriber("/binary_merged_octomap",Octomap,self.binary_octomap_copier)
-            self.full_sub=rospy.Subscriber("/full_merged_octomap",Octomap,self.full_octomap_copier)
-            # Msgs
-            self.binary_merged_srv_msg = GetOctomapResponse()
-            self.full_merged_srv_msg = GetOctomapResponse()
-            # Header
-            self.binary_frame_id_stamp = ""
-            self.full_frame_id_stamp = ""
-            # Data to copy over 
-            self.binary_data = 0
-            self.full_data = 0
-            # Sequence stamp counters
-            self.binary_seq_stamp = 0
-            self.full_seq_stamp = 0
-
-        elif (self.merge_type == "binary"):
-            self.binary_sub=rospy.Subscriber("/binary_merged_octomap",Octomap,self.binary_octomap_copier)
-            # Msgs
-            self.binary_merged_srv_msg = GetOctomapResponse()
-            # Header
-            self.binary_frame_id_stamp = ""
-            # Data to copy over 
-            self.binary_data = 0
-            # Sequence stamp counters
-            self.binary_seq_stamp = 0
-
-        else:
-            self.full_sub=rospy.Subscriber("/full_merged_octomap",Octomap,self.full_octomap_copier)
-            # Msgs
-            self.full_merged_srv_msg = GetOctomapResponse()
-            # Header
-            self.full_frame_id_stamp = ""
-            # Data to copy over 
-            self.full_data = 0
-            # Sequence stamp counters
-            self.full_seq_stamp = 0
+        self.full_sub=rospy.Subscriber("/full_merged_octomap",Octomap,self.full_octomap_copier)
+        # Msgs
+        self.full_merged_srv_msg = GetOctomapResponse()
+        # Header
+        self.full_frame_id_stamp = ""
+        # Data to copy over 
+        self.full_data = 0
+        # Sequence stamp counters
+        self.full_seq_stamp = 0
 
     def binary_octomap_copier(self, msg):
         # Copying all needed info from the base
@@ -110,13 +73,7 @@ class MergedOctoMapServiceProvider():
 if __name__ == '__main__':
     rospy.init_node("merged_octomap_service",anonymous=True, log_level=rospy.INFO)
     converter = MergedOctoMapServiceProvider()
-    if (converter.merge_type == "both"):
-        binary_service_server = rospy.Service("/octomap_binary_merged", GetOctomap, converter.binary_service_generator)
-        full_service_server = rospy.Service("/octomap_full_merged", GetOctomap, converter.full_service_generator)
-    elif (converter.merge_type == "binary"):
-        binary_service_server = rospy.Service("/octomap_binary_merged", GetOctomap, converter.binary_service_generator)
-    else:
-        full_service_server = rospy.Service("/octomap_full_merged", GetOctomap, converter.full_service_generator)
+    full_service_server = rospy.Service("/octomap_full_merged", GetOctomap, converter.full_service_generator)
 
     rospy.loginfo_once("Merged Service Provider seems to be working.")
 
