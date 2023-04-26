@@ -7,6 +7,7 @@
     <param name="fiducial_tf_topic" value="/robot/fiducial_transforms"/>
     <!-- Frame Parameters -->
     <param name="odom_frame" value="/robot_odom"/>
+
     <!-- World Frame Parameters -->
     <param name="min_frames" value="60"/>
   </node>
