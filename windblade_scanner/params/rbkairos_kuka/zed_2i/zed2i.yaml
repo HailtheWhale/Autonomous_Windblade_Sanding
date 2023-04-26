@@ -7,14 +7,14 @@ general:
 
 depth:
     min_depth:                  0.3             # Min: 0.2, Max: 3.0 - Default 0.7 - Note: reducing this value wil require more computational power and GPU memory
-    max_depth:                  5.0             # Max: 40.0
+    max_depth:                  1.8             # Max: 40.0
 
 pos_tracking:
     imu_fusion:                 false            # enable/disable IMU fusion. When set to false, only the optical odometry will be used.
 
 sensors:
-    sensors_timestamp_sync:     false           # Synchronize Sensors messages timestamp with latest received frame
-    max_pub_rate:               200.            # max frequency of publishing of sensors data. MAX: 400. - MIN: grab rate
+    sensors_timestamp_sync:     true           # Synchronize Sensors messages timestamp with latest received frame
+    max_pub_rate:               15.            # max frequency of publishing of sensors data. MAX: 400. - MIN: grab rate
     publish_imu_tf:             true            # publish `IMU -> <cam_name>_left_camera_frame` TF
 
 object_detection:
