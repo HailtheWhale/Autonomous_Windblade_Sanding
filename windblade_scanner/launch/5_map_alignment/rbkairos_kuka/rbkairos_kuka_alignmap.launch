@@ -1,6 +1,26 @@
 <launch>
   <!-- Launches TF publisher for world frame. -->
-  <node pkg="windblade_scanner" type="map_alignment.py" ns="windblade_map" name="map_alignment" output="screen" >
+  <node pkg="windblade_scanner" type="map_alignment.py" name="map_alignment" output="screen" >
+      <!-- Topic Parameters -->
+      <param name="loaded_map_topic_turtlebot" value="/occupied_cells_vis_array_loaded_map_turtlebot"/>
+      <param name="loaded_map_topic_rbkairos" value="/occupied_cells_vis_array_loaded_map_rbkairos"/>
+  
+      <!-- Loaded Turtlemap Limits -->
+      <param name="xmin_turtle" value="0"/>
+      <param name="xmax_turtle" value="1"/>
+      <param name="ymin_turtle" value="-50"/>
+      <param name="ymax_turtle" value="50"/>
+      <param name="zmin_turtle" value="0.62"/>
+      <param name="zmax_turtle" value="0.77"/>
+
+      <!-- Loaded Rbkairosmap Limits -->
+      <param name="xmin_rbkairos" value="1"/>
+      <param name="xmax_rbkairos" value="4"/>
+      <param name="ymin_rbkairos" value="-0.42"/>
+      <param name="ymax_rbkairos" value="0.45"/>
+      <param name="zmin_rbkairos" value="-50"/>
+      <param name="zmax_rbkairos" value="0.77"/>
+  
   </node>
   
 </launch>

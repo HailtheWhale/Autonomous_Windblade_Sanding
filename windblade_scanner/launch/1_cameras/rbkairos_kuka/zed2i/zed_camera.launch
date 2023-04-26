@@ -28,7 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <arg name="stream"                default="" /> <!-- <arg name="stream" default="<ip_address>:<port>"> -->
 
     <!-- Base frame -->
-    <arg name="base_frame"            default="base_link" />
+    <arg name="base_frame"            default="static_arm_ee" />
 
     <!-- Publish ZED urdf -->
     <arg name="publish_urdf"          default="true" />
@@ -66,7 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </node>
     </group>
 
-    <arg name="robot"               default="robotnik_kuka" />
+    <arg name="robot"               default="rbkairos_kuka" />
     <node name="$(arg node_name)" pkg="zed_wrapper" type="zed_wrapper_node" output="screen" required="true"><!-- launch-prefix="valgrind" -->
         <rosparam file="$(find windblade_scanner)/params/$(arg robot)/zed_2i/common.yaml" command="load" />
         <rosparam file="$(find windblade_scanner)/params/$(arg robot)/zed_2i/$(arg camera_model).yaml" command="load" />
