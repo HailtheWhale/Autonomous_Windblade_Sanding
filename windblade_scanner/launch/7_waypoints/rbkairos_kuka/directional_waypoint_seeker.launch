@@ -1,14 +1,14 @@
 <launch>
   <!-- The waypoint seeker, but can go backwards if specified. -->
   <!-- Turtlebot Driver node -->
-  <param name="waypoint_file" value="$(find windblade_scanner)/config/7_waypoints/rbkairos_kuka/directional_rbkairos_path.txt"/>
+  <param name="waypoint_file" value="$(find windblade_scanner)/config/7_waypoints/rbkairos_kuka/rbkairos_back_and_forth.txt"/>
   <node pkg="windblade_scanner" type="directional_driver_mod.py" name="waypoint_seeker" output="screen">
     <!-- Set the arguments to parameters -->
     <param name="goal_th_xy" value="0.15"/>
-    <param name="goal_th_ang" value="0.1"/>
+    <param name="goal_th_ang" value="0.3"/>
     <param name="desired_laps" value="1"/>
-    <param name="turn_spd" value="0.4"/>
-    <param name="linear_spd" value="0.30"/>
+    <param name="turn_spd" value="0.1"/>
+    <param name="linear_spd" value="0.075"/>
     <!-- Define topics -->
     <param name="odom_topic" value="/robot/robotnik_base_control/odom"/>
     <param name="cmd_vel_topic" value="/robot/cmd_vel"/>

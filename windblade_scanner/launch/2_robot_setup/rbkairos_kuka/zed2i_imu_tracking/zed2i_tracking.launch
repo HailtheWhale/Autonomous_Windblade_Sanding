@@ -1,0 +1,6 @@
+<launch>
+  <!-- Launches TF publisher for world frame. -->
+  <node pkg="windblade_scanner" type="zed2i_imu_odom.py" name="zed2i_tracker1" output="screen" >
+  </node>
+
+</launch>

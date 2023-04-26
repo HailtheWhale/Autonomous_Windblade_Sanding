@@ -14,7 +14,7 @@
 		<param name="frame_id" type="string" value="world" />
 		
 		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="5.0" />
+		<param name="sensor_model/max_range" value="2.0" />
 
 		<!-- Salt and Pepper Filter !!! (UNDOCUMENTED Param)-->
 		<param name="filter_speckles" value="true"/>
@@ -22,12 +22,14 @@
 		<!-- Filter workspace -->
 		<param name="filter_ground" value="false"/>
 
-		<param name="pointcloud_min_x" value="-1.6"/>
-		<param name="pointcloud_max_x" value="1.6"/>
-		<param name="pointcloud_min_y" value="3.25"/>
-		<param name="pointcloud_max_y" value="7.55"/>
-		<param name="pointcloud_max_z" value="0.90"/>
-		<param name="pointcloud_min_z" value="0.5"/>
+		<param name="pointcloud_min_y" value="-1.6"/>
+		<param name="pointcloud_max_y" value="-0.2"/>
+
+		<param name="pointcloud_min_x" value="3.25"/>
+		<param name="pointcloud_max_x" value="7.55"/>
+
+		<param name="pointcloud_max_z" value="0.95"/>
+		<param name="pointcloud_min_z" value="0.6"/>
 
 		<!-- Camera 1. Remap Occupied Cells, Free Cells, and Projected Map Topics to allow multiple to run simultaneously. -->
 		<remap from="occupied_cells_vis_array" to="occupied_cells_vis_array_rbkairos"/>
@@ -39,8 +41,9 @@
 
 		<!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/zed2i/zed_node/point_cloud/cloud_registered"/>
+
 <!--
-		<remap from="cloud_in" to="/robot/front_rgbd_camera/depth/points"/>
+		<remap from="cloud_in" to="/robot/front_rgbd_camera/depth_registered/points"/>
 -->
     </node>
 

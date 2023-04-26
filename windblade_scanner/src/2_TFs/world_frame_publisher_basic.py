@@ -50,7 +50,6 @@ class WorldPub():
         # To keep looping until done.
         self.world_aruco_determined = False 
 
-
 ###############################################################
 # Helper Functions 
 ###############################################################
@@ -121,7 +120,7 @@ class WorldPub():
                     avg_world_tf_pose_y/=(len(self.world_tf_pose_x))
                     avg_world_tf_orient_z/=(len(self.world_tf_pose_x))
                     # Convert from Euler to Quat 
-                    oxw,oyw,ozw,oww= self.euler_to_quat(0,0,avg_world_tf_orient_z)
+                    oxw,oyw,ozw,oww= self.euler_to_quat(0,0,avg_world_tf_orient_z+1.57)
                     # Save values                         
                     self.world_tf_pose_x = avg_world_tf_pose_x
                     self.world_tf_pose_y = avg_world_tf_pose_y
@@ -138,7 +137,7 @@ class WorldPub():
                     self.world_tf_orient_z.append(yaw)
 
         except:
-            rospy.logdebug("World Frame not in View!")                    
+            rospy.logdebug("World Frame not in View!")    
 
 #########################################################################
 # Publishers 
@@ -146,8 +145,8 @@ class WorldPub():
 
     def world_publisher(self):
         # Sends the QR Code TF
-        parent_frame = self.odom_frame
-        child_frame = "world"
+        parent_frame = "world"
+        child_frame = self.odom_frame
         self.world_tf_broadcaster.sendTransform((self.world_tf_pose_x, self.world_tf_pose_y, 0), 
                                             (self.world_tf_orient_x,self.world_tf_orient_y,self.world_tf_orient_z,
                                             self.world_tf_orient_w), rospy.Time.now(), child_frame, parent_frame)
@@ -166,6 +165,6 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         try:
             world_tf.world_publisher()
-	    world_tf.rate.sleep()
+            world_tf.rate.sleep()
         except rospy.ROSInterruptException:
             world_tf.shutdown_hook()

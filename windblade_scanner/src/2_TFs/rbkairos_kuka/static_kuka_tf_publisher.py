@@ -86,7 +86,7 @@ class StaticArm():
         ########################
         parent_frame_01 = "static_arm_link_0"
         child_frame_01 = "static_arm_link_1"
-        trans_01 = (0.0,0.0,0.15)
+        trans_01 = (0.0,0.0,0.0)
 	# BLUE
         quat_01 = self.euler_to_quat(0.0,0.0,self.J1)
 
@@ -164,7 +164,7 @@ class StaticArm():
         parent_frame_7ee = "static_arm_link_7"
         child_frame_7ee = "static_arm_link_ee"
         trans_7ee = (0.0,0.0,0.171)
-        quat_7ee = self.euler_to_quat(0.0,0.07,0.0)
+        quat_7ee = self.euler_to_quat(0.0,0.07,-0.03)
 
         self.arm_tf_broadcaster7ee.sendTransform(trans_7ee, 
                                             quat_7ee, rospy.Time.now(), child_frame_7ee, parent_frame_7ee)
