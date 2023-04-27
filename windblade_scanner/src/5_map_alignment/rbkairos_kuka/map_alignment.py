@@ -22,6 +22,9 @@ from colour import Color
 # For Alignment 
 import math
 
+# For path planning comparisons 
+from nav_msgs.msg import Odometry
+
 
 class MapAlignment():
 
@@ -36,7 +39,13 @@ class MapAlignment():
         # Define topics 
 		self.node_name = "map_alignment/"
 		self.map_turtle = str(rospy.get_param(self.node_name + "loaded_map_topic_turtlebot"))
-		self.map_rbkairos = str(rospy.get_param(self.node_name + "loaded_map_topic_rbkairos"))
+		self.topic_rbkairos = str(rospy.get_param(self.node_name + "map_topic_rbkairos"))
+		self.odom = str(rospy.get_param(self.node_name + "odom_topic"))
+
+		# Waypoint Check Data 
+		self.waypoint_x = str(rospy.get_param(self.node_name + "waypoint_x"))
+		self.waypoint_y = str(rospy.get_param(self.node_name + "waypoint_y"))
+		self.waypoint_tol = str(rospy.get_param(self.node_name + "waypoint_tol"))
 
 		# Turtlemap filter limits
 		self.xmin_turtle = float(rospy.get_param(self.node_name + "xmin_turtle"))
@@ -55,12 +64,16 @@ class MapAlignment():
 		self.zmax_rbkairos = float(rospy.get_param(self.node_name + "zmax_rbkairos"))
 
 		# Subscribers, publishers 																								
-		self.align_sub_turtle=rospy.Subscriber(self.map_turtle,MarkerArray, self.turtle_scrubber)
-		self.align_sub_rbkairos=rospy.Subscriber(self.map_rbkairos,MarkerArray, self.rbkairos_scrubber)
+		self.align_sub_turtle=rospy.Subscriber(self.map_turtle, MarkerArray, self.turtle_scrubber)
+		# Loaded Map 
+		self.align_sub_rbkairos=rospy.Subscriber(self.topic_rbkairos, MarkerArray, self.rbkairos_scrubber)
+		# Autonomous 
+		self.odom_sub=rospy.Subscriber(self.odom, Odometry,self.waypoint_checker)
+
 
 		self.align_pub1 = rospy.Publisher("/occupied_cells_loaded_map_scrubbed_turtle",MarkerArray, queue_size=1)
-		self.align_pub2 = rospy.Publisher("/occupied_cells_loaded_map_scrubbed_rbkairos",MarkerArray, queue_size=1)
-		self.align_pub = rospy.Publisher("/occupied_cells_loaded_map_scrubbed_merged",MarkerArray, queue_size=1)
+		self.align_pub2 = rospy.Publisher("/occupied_cells_map_scrubbed_rbkairos",MarkerArray, queue_size=1)
+		self.align_pub = rospy.Publisher("/occupied_cells_map_scrubbed_merged",MarkerArray, queue_size=1)
 
 		# Msgs
 		self.loaded_map_info_turtle = MarkerArray()
@@ -70,10 +83,13 @@ class MapAlignment():
 		# Fullmerge
 		self.fullmerge=MarkerArray()
 
-		# Merged?
-		self.merged = False
+	## Waypoints 
+		self.at_waypoint = False
 
 	## Visualization
+		# Only want ONE data set. 
+		self.data_recieved_robot = False 
+		self.data_recieved_map = False 
 		# Countour line publisher. 
 		self.contour_pub = rospy.Publisher("/contours",Marker, queue_size=1)
 		# Containers for contour plots. 
@@ -89,6 +105,9 @@ class MapAlignment():
 		self.aligned = False
 		self.map_rescaled = False
 
+	## Merging 
+		self.merged = False
+
 # Helper functions
 	def quat_to_euler(self, x, y, z, w):
 		quat = [x,y,z,w]
@@ -100,230 +119,247 @@ class MapAlignment():
 		return [x,y,z,w]
 
 ##########################
+### Waypoint Checker
+##########################
+	def waypoint_checker(self, msg):
+		if not self.at_waypoint:
+			# Check if in tolerance of desired waypoint.
+			# IF within tolerance, will perform the map alignment and merge. 
+			x_pos = msg.pose.pose.position.x
+			y_pos = msg.pose.pose.position.y
+			if x_pos >= self.waypoint_x-self.waypoint_tol/2 and x_pos <= self.waypoint_x+self.waypoint_tol/2\
+			and y_pos >= self.waypoint_y-self.waypoint_tol/2 and y_pos <= self.waypoint_y+self.waypoint_tol/2:
+				self.at_waypoint = True
+
+##########################
 ### Turtle scrubber
 ##########################
 	def turtle_scrubber(self, msg):
-		loaded_info_array1 = msg.markers
+		# ONLY want 1 MSG. 
+		if not self.data_recieved_map:
+			self.data_recieved_map = True
+			loaded_info_array1 = msg.markers
 
-		######################
-		# Partition Data
-		######################
-		'''
-		info_size_list1 = []
-		for i in range(0,len(loaded_info_array1)):
-			item = (i, len(loaded_info_array1[i].points), len(loaded_info_array1[i].colors))
-			info_size_list1.append(item)
-			#rospy.loginfo("Turtle %s",str(i))
-		#rospy.loginfo("Rbkairos List %s",str(info_size_list1))
-		'''
+			######################
+			# Partition Data
+			######################
+			'''
+			info_size_list1 = []
+			for i in range(0,len(loaded_info_array1)):
+				item = (i, len(loaded_info_array1[i].points), len(loaded_info_array1[i].colors))
+				info_size_list1.append(item)
+				#rospy.loginfo("Turtle %s",str(i))
+			#rospy.loginfo("Rbkairos List %s",str(info_size_list1))
+			'''
 
-		# Save Raw Data
-		self.loaded_map_info_turtle.markers = [loaded_info_array1[15],loaded_info_array1[16]]
-		
-		#rospy.loginfo("BASE MAP LENGTH %s",str(len(self.loaded_map_info_turtle.markers[1].points)))
+			# Save Raw Data
+			self.loaded_map_info_turtle.markers = [loaded_info_array1[15],loaded_info_array1[16]]
+			
+			#rospy.loginfo("BASE MAP LENGTH %s",str(len(self.loaded_map_info_turtle.markers[1].points)))
 
-		############################
-		# RANGE FILTER
-		############################
+			############################
+			# RANGE FILTER
+			############################
 
-		for array in range(0,len(self.loaded_map_info_turtle.markers)):
-			#print(array)
-			#print("Original Length Array", array,len(self.loaded_map_info_turtle.markers[array].points))
+			for array in range(0,len(self.loaded_map_info_turtle.markers)):
+				#print(array)
+				#print("Original Length Array", array,len(self.loaded_map_info_turtle.markers[array].points))
 
-			anomoly_count_range1 = 0
-			anomoly_list_range1 = []
+				anomoly_count_range1 = 0
+				anomoly_list_range1 = []
 
-			list1 = []
+				list1 = []
 
-			# Range Filter
-			for i in range(0,len(self.loaded_map_info_turtle.markers[array].points)):
-				z = self.loaded_map_info_turtle.markers[array].points[i].z
-				y = self.loaded_map_info_turtle.markers[array].points[i].y
-				x = self.loaded_map_info_turtle.markers[array].points[i].x
-				if x < (self.xmin_turtle) or x > (self.xmax_turtle) or y < (self.ymin_turtle) or y > (self.ymax_turtle) or z< (self.zmin_turtle) or z > (self.zmax_turtle):
-					'''
-					if x < (self.xmin_turtle) or x > (self.xmax_turtle):
-						list1.append((x,y,z,"x viol", "xmin:",self.xmin_turtle, "xmax:", self.xmax_turtle))
-					elif y < (self.ymin_turtle) or y > (self.ymax_turtle):
-						list1.append((x,y,z, "y viol", "ymin:",self.ymin_turtle, "ymax:", self.ymax_turtle))
-					else:
-						list1.append((x,y,z, "z viol","zmin:",self.zmin_turtle, "zmax:", self.zmax_turtle))
-					'''
-					anomoly_count_range1+=1
-					item = ("index", i, x,y,z)
-					anomoly_list_range1.append(item)
+				# Range Filter
+				for i in range(0,len(self.loaded_map_info_turtle.markers[array].points)):
+					z = self.loaded_map_info_turtle.markers[array].points[i].z
+					y = self.loaded_map_info_turtle.markers[array].points[i].y
+					x = self.loaded_map_info_turtle.markers[array].points[i].x
+					if x < (self.xmin_turtle) or x > (self.xmax_turtle) or y < (self.ymin_turtle) or y > (self.ymax_turtle) or z< (self.zmin_turtle) or z > (self.zmax_turtle):
+						'''
+						if x < (self.xmin_turtle) or x > (self.xmax_turtle):
+							list1.append((x,y,z,"x viol", "xmin:",self.xmin_turtle, "xmax:", self.xmax_turtle))
+						elif y < (self.ymin_turtle) or y > (self.ymax_turtle):
+							list1.append((x,y,z, "y viol", "ymin:",self.ymin_turtle, "ymax:", self.ymax_turtle))
+						else:
+							list1.append((x,y,z, "z viol","zmin:",self.zmin_turtle, "zmax:", self.zmax_turtle))
+						'''
+						anomoly_count_range1+=1
+						item = ("index", i, x,y,z)
+						anomoly_list_range1.append(item)
 
-			for i in range(0,len(list1)):
-				rospy.loginfo("z list, %s: %s", str(i),str(list1[i]))
-			#######################
-			# Remove Anomolies
-			#######################
-			for i in range(0,len(anomoly_list_range1)):
-				index = anomoly_list_range1[i][1]-i
-				del self.loaded_map_info_turtle.markers[array].points[index]
-				del self.loaded_map_info_turtle.markers[array].colors[index]
+				for i in range(0,len(list1)):
+					rospy.loginfo("z list, %s: %s", str(i),str(list1[i]))
+				#######################
+				# Remove Anomolies
+				#######################
+				for i in range(0,len(anomoly_list_range1)):
+					index = anomoly_list_range1[i][1]-i
+					del self.loaded_map_info_turtle.markers[array].points[index]
+					del self.loaded_map_info_turtle.markers[array].colors[index]
 
-			# Save Data
-			#print("SCRUBBED 1!")
-			rospy.logdebug("Scrubbed Length Array %s %s", str(array),str(len(self.loaded_map_info_turtle.markers[array].points)))
+				# Save Data
+				#print("SCRUBBED 1!")
+				rospy.logdebug("Scrubbed Length Array %s %s", str(array),str(len(self.loaded_map_info_turtle.markers[array].points)))
 
-		if len(self.final_map_info_turtle.markers) == 0:
-			self.final_map_info_turtle.markers = self.loaded_map_info_turtle.markers
+			if len(self.final_map_info_turtle.markers) == 0:
+				self.final_map_info_turtle.markers = self.loaded_map_info_turtle.markers
 
-	##############################################
-	# Map Align Part I: Elevation Data Reorganization 
-	##############################################
-		### 1. Get elevation data. How many curves working with. 
-		# Voxel list 
-		voxel_list1 = []
-		# Elevation data 
-		z_counter1 = 0
-		z_level1 = []
-		z_data1 = []
-		for i in range(0,len(self.loaded_map_info_turtle.markers[1].points)):
-			x = round(self.loaded_map_info_turtle.markers[1].points[i].x,3)
-			y = round(self.loaded_map_info_turtle.markers[1].points[i].y,3)
-			z = round(self.loaded_map_info_turtle.markers[1].points[i].z,3)
-			# Save unique elevation data, least to greatest. 
-			if z not in z_data1:
-				z_counter1+=1
-				z_level1.append(z)
-				z_level1.sort()
-			# Save Data
-			z_data1.append(z)
-			voxel_list1.append((x,y,z))
+		##############################################
+		# Map Align Part I: Elevation Data Reorganization 
+		##############################################
+			### 1. Get elevation data. How many curves working with. 
+			# Voxel list 
+			voxel_list1 = []
+			# Elevation data 
+			z_counter1 = 0
+			z_level1 = []
+			z_data1 = []
+			for i in range(0,len(self.loaded_map_info_turtle.markers[1].points)):
+				x = round(self.loaded_map_info_turtle.markers[1].points[i].x,3)
+				y = round(self.loaded_map_info_turtle.markers[1].points[i].y,3)
+				z = round(self.loaded_map_info_turtle.markers[1].points[i].z,3)
+				# Save unique elevation data, least to greatest. 
+				if z not in z_data1:
+					z_counter1+=1
+					z_level1.append(z)
+					z_level1.sort()
+				# Save Data
+				z_data1.append(z)
+				voxel_list1.append((x,y,z))
 
-	###### Store the elevation data for reference to scanned map. 
-		self.map_z_levels = z_data1
+		###### Store the elevation data for reference to scanned map. 
+			self.map_z_levels = z_data1
 
-		# Make List to store values for contour fitting.  
-		contour_data1 = []
-		for i in range(0,z_counter1):
-			contour_data1.append((z_level1[i],[[],[]]))
+			# Make List to store values for contour fitting.  
+			contour_data1 = []
+			for i in range(0,z_counter1):
+				contour_data1.append((z_level1[i],[[],[]]))
 
 
-		rospy.logdebug("Z_count Turtle %s", str(z_counter1))
-		rospy.logdebug("Z_level Turtle %s", str(z_level1))
+			rospy.logdebug("Z_count Turtle %s", str(z_counter1))
+			rospy.logdebug("Z_level Turtle %s", str(z_level1))
 
-		### 2. Only the topmost curve matters, but will curvefit all curves for visualization. 
-		# Resort Data for Curve Fitting
-		for i in range(0,len(voxel_list1)):
-			# Check for elevation match. Save x,y if found. 
-			for level in range(0,len(contour_data1)):
-				if voxel_list1[i][2] == contour_data1[level][0]:
-					contour_data1[level][1][0].append(voxel_list1[i][0])
-					contour_data1[level][1][1].append(voxel_list1[i][1])
-					break
+			### 2. Only the topmost curve matters, but will curvefit all curves for visualization. 
+			# Resort Data for Curve Fitting
+			for i in range(0,len(voxel_list1)):
+				# Check for elevation match. Save x,y if found. 
+				for level in range(0,len(contour_data1)):
+					if voxel_list1[i][2] == contour_data1[level][0]:
+						contour_data1[level][1][0].append(voxel_list1[i][0])
+						contour_data1[level][1][1].append(voxel_list1[i][1])
+						break
 
-		####self.feature_finder(data=contour_data1,map_name="Turtle")
-		# Save Data for plotting 
-		self.contour_data[0] = contour_data1
-		#rospy.loginfo(contour_data1)
+			####self.feature_finder(data=contour_data1,map_name="Turtle")
+			# Save Data for plotting 
+			self.contour_data[0] = contour_data1
+			#rospy.loginfo(contour_data1)
 
 ###########################
 ### Rbkairos scrubber
 ###########################
 	def rbkairos_scrubber(self, msg):
-		rospy.logdebug("rbkairos Scrubber got a msg.")
-		loaded_info_array2 = msg.markers
-		# print(len(msg.markers)) # === 17
+		# ONLY want 1 MSG from the robot once its AT the waypoint.
+		if not self.data_recieved_robot and self.at_waypoint:
+			self.data_recieved_robot = True
+			loaded_info_array2 = msg.markers
 
-		######################
-		# Partition Data
-		######################
-		'''
-		info_size_list2 = []
-		for i in range(0,len(loaded_info_array2)):
-			item = (i, len(loaded_info_array2[i].points), len(loaded_info_array2[i].colors))
-			info_size_list2.append(item)
-			#rospy.loginfo("Rbkairos %s",str(i))
-		#rospy.loginfo("Rbkairos List %s",str(info_size_list2))
-		'''
-		# Save Raw Data
-		self.loaded_map_info_rbkairos.markers = [loaded_info_array2[15],loaded_info_array2[16]]
+			######################
+			# Partition Data
+			######################
+			'''
+			info_size_list2 = []
+			for i in range(0,len(loaded_info_array2)):
+				item = (i, len(loaded_info_array2[i].points), len(loaded_info_array2[i].colors))
+				info_size_list2.append(item)
+				#rospy.loginfo("Rbkairos %s",str(i))
+			#rospy.loginfo("Rbkairos List %s",str(info_size_list2))
+			'''
+			# Save Raw Data
+			self.loaded_map_info_rbkairos.markers = [loaded_info_array2[15],loaded_info_array2[16]]
 
-		############################
-		# RANGE FILTER
-		############################
+			############################
+			# RANGE FILTER
+			############################
 
-		for array in range(0,len(self.loaded_map_info_rbkairos.markers)):
-			#print(array)
-			#print("Original Length 1", len(self.loaded_map_info_rbkairos.markers[array].points))
+			for array in range(0,len(self.loaded_map_info_rbkairos.markers)):
+				#print(array)
+				#print("Original Length 1", len(self.loaded_map_info_rbkairos.markers[array].points))
 
-			anomoly_count_range2 = 0
-			anomoly_list_range2 = []
+				anomoly_count_range2 = 0
+				anomoly_list_range2 = []
 
-			# Range Filter
-			for i in range(0,len(self.loaded_map_info_rbkairos.markers[array].points)):
-				z = self.loaded_map_info_rbkairos.markers[array].points[i].z
-				y = self.loaded_map_info_rbkairos.markers[array].points[i].y
-				x = self.loaded_map_info_rbkairos.markers[array].points[i].x
-				if x < (self.xmin_rbkairos) or x > (self.xmax_rbkairos) or y < (self.ymin_rbkairos) or y > (self.ymax_rbkairos) or z< (self.zmin_rbkairos) or z > (self.zmax_rbkairos):
-					anomoly_count_range2+=1
-					item = ("index", i, x,y,z)
-					anomoly_list_range2.append(item)
+				# Range Filter
+				for i in range(0,len(self.loaded_map_info_rbkairos.markers[array].points)):
+					z = self.loaded_map_info_rbkairos.markers[array].points[i].z
+					y = self.loaded_map_info_rbkairos.markers[array].points[i].y
+					x = self.loaded_map_info_rbkairos.markers[array].points[i].x
+					if x < (self.xmin_rbkairos) or x > (self.xmax_rbkairos) or y < (self.ymin_rbkairos) or y > (self.ymax_rbkairos) or z< (self.zmin_rbkairos) or z > (self.zmax_rbkairos):
+						anomoly_count_range2+=1
+						item = ("index", i, x,y,z)
+						anomoly_list_range2.append(item)
 
-			#######################
-			# Remove Anomolies
-			#######################
-			for i in range(0,len(anomoly_list_range2)):
-				index = anomoly_list_range2[i][1]-i
-				del self.loaded_map_info_rbkairos.markers[array].points[index]
-				del self.loaded_map_info_rbkairos.markers[array].colors[index]
+				#######################
+				# Remove Anomolies
+				#######################
+				for i in range(0,len(anomoly_list_range2)):
+					index = anomoly_list_range2[i][1]-i
+					del self.loaded_map_info_rbkairos.markers[array].points[index]
+					del self.loaded_map_info_rbkairos.markers[array].colors[index]
 
-			# Save Data
-			#print("SCRUBBED 1!")
-			#rospy.logdebug("Scrubbed Length %s %s", str(array),str(len(self.loaded_map_info_rbkairos.markers[array].points)))
+				# Save Data
+				#print("SCRUBBED 1!")
+				#rospy.logdebug("Scrubbed Length %s %s", str(array),str(len(self.loaded_map_info_rbkairos.markers[array].points)))
 
-		if len(self.final_map_info_rbkairos.markers) == 0:
-			self.final_map_info_rbkairos.markers = self.loaded_map_info_rbkairos.markers
+			if len(self.final_map_info_rbkairos.markers) == 0:
+				self.final_map_info_rbkairos.markers = self.loaded_map_info_rbkairos.markers
 
 
-	##############################################
-	# Map Align Part I: Elevation Data Reorganization 
-	##############################################
-		### 1. Get elevation data. How many curves working with. 
-		# Voxel list 
-		voxel_list2 = []
-		# Elevation data 
-		z_counter2 = 0
-		z_level2 = []
-		z_data2 = []
-		for i in range(0,len(self.loaded_map_info_rbkairos.markers[1].points)):
-			x = round(self.loaded_map_info_rbkairos.markers[1].points[i].x,3)
-			y = round(self.loaded_map_info_rbkairos.markers[1].points[i].y,3)
-			z = round(self.loaded_map_info_rbkairos.markers[1].points[i].z,3)
-			# Save unique elevation data, least to greatest. 
-			if z not in z_data2:
-				z_counter2+=1
-				z_level2.append(z)
-				z_level2.sort()
-			# Save Data
-			z_data2.append(z)
-			voxel_list2.append((x,y,z))
+		##############################################
+		# Map Align Part I: Elevation Data Reorganization 
+		##############################################
+			### 1. Get elevation data. How many curves working with. 
+			# Voxel list 
+			voxel_list2 = []
+			# Elevation data 
+			z_counter2 = 0
+			z_level2 = []
+			z_data2 = []
+			for i in range(0,len(self.loaded_map_info_rbkairos.markers[1].points)):
+				x = round(self.loaded_map_info_rbkairos.markers[1].points[i].x,3)
+				y = round(self.loaded_map_info_rbkairos.markers[1].points[i].y,3)
+				z = round(self.loaded_map_info_rbkairos.markers[1].points[i].z,3)
+				# Save unique elevation data, least to greatest. 
+				if z not in z_data2:
+					z_counter2+=1
+					z_level2.append(z)
+					z_level2.sort()
+				# Save Data
+				z_data2.append(z)
+				voxel_list2.append((x,y,z))
 
-		# Make List to store values for contour fitting.  
-		contour_data2 = []
-		for i in range(0,z_counter2):
-			contour_data2.append((z_level2[i],[[],[]]))
+			# Make List to store values for contour fitting.  
+			contour_data2 = []
+			for i in range(0,z_counter2):
+				contour_data2.append((z_level2[i],[[],[]]))
 
-		rospy.logdebug("Z_count rbkairos %s", str(z_counter2))
-		rospy.logdebug("Z_level rbkairos %s", str(z_level2))
+			rospy.logdebug("Z_count rbkairos %s", str(z_counter2))
+			rospy.logdebug("Z_level rbkairos %s", str(z_level2))
 
-		### 2. Only the topmost curve matters, but will curvefit all curves for visualization. 
-		# Resort Data for Curve Fitting
-		for i in range(0,len(voxel_list2)):
-			# Check for elevation match. Save x,y if found. 
-			for level in range(0,len(contour_data2)):
-				if voxel_list2[i][2] == contour_data2[level][0]:
-					contour_data2[level][1][0].append(voxel_list2[i][0])
-					contour_data2[level][1][1].append(voxel_list2[i][1])
-					break
+			### 2. Only the topmost curve matters, but will curvefit all curves for visualization. 
+			# Resort Data for Curve Fitting
+			for i in range(0,len(voxel_list2)):
+				# Check for elevation match. Save x,y if found. 
+				for level in range(0,len(contour_data2)):
+					if voxel_list2[i][2] == contour_data2[level][0]:
+						contour_data2[level][1][0].append(voxel_list2[i][0])
+						contour_data2[level][1][1].append(voxel_list2[i][1])
+						break
 
-		####self.feature_finder(data=contour_data2,map_name="Rbkairos")
+			####self.feature_finder(data=contour_data2,map_name="Rbkairos")
 
-		# Save Data for plotting 
-		self.contour_data[1] = contour_data2
+			# Save Data for plotting 
+			self.contour_data[1] = contour_data2
 
 ##############################################
 # Map Align Part II: Countour Map Creation
@@ -755,9 +791,9 @@ if __name__ == '__main__':
 	while not rospy.is_shutdown():
 		try:
 			#alignment.align_pub1.publish(alignment.final_map_info_turtle)
-			alignment.align_pub2.publish(alignment.final_map_info_rbkairos)
+			#alignment.align_pub2.publish(alignment.final_map_info_rbkairos)
 
-			# Wait for appropriate data... 
+			# Wait for appropriate data... Will only be true once the robot is near the set waypoint.
 			if len(alignment.contour_data[0]) > 0 and len(alignment.contour_data[1]) > 0:
 				# Call the Feature Finders ONCE...
 				if not alignment.features_found:

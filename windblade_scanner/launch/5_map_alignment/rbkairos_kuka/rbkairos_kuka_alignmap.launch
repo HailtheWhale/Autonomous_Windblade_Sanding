@@ -3,8 +3,21 @@
   <node pkg="windblade_scanner" type="map_alignment.py" name="map_alignment" output="screen" >
       <!-- Topic Parameters -->
       <param name="loaded_map_topic_turtlebot" value="/occupied_cells_vis_array_loaded_map_turtlebot"/>
-      <param name="loaded_map_topic_rbkairos" value="/occupied_cells_vis_array_loaded_map_rbkairos"/>
-  
+      <!-- Loaded Map -->
+      <!--
+      <param name="map_topic_rbkairos" value="/occupied_cells_vis_array_loaded_map_rbkairos"/>
+      -->
+      <!--Autonomous Mapping-->
+      <param name="map_topic_rbkairos" value="/occupied_cells_vis_array_rbkairos"/>
+
+      <param name="odom_topic" value="/robot/robotnik_base_control/odom"/>
+
+      <!-- Merge Waypoint Limits -->
+      <!-- The odometry value the node will listen to and wait until gets x y planar value.-->
+      <param name="waypoint_x" value="-5.5"/>
+      <param name="waypoint_y" value="0.0"/>
+      <param name="waypoint_tol" value="0.1"/>
+
       <!-- Loaded Turtlemap Limits -->
       <param name="xmin_turtle" value="0"/>
       <param name="xmax_turtle" value="1"/>
