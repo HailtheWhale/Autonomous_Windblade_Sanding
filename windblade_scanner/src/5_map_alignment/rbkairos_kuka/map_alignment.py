@@ -86,7 +86,7 @@ class MapAlignment():
 		# Fullmerge
 		self.fullmerge=MarkerArray()
 		# TEST
-		self.test_merge = MarkerArray()
+		self.final_merge = MarkerArray()
 
 	## Waypoints 
 	# DEBUG. SETTING TO TRUE. Normally False When robot following path. 
@@ -863,72 +863,72 @@ class MapAlignment():
 
 			# Make the merged marker array.
 			for i in range(0,2):
-				self.test_merge.markers.append(Marker())
+				self.final_merge.markers.append(Marker())
 
 			for i in range(0,2):
 				# Set Header 
-				self.test_merge.markers[i].header.seq=0
-				self.test_merge.markers[i].header.stamp=rospy.Time.now()
-				self.test_merge.markers[i].header.frame_id="world"
+				self.final_merge.markers[i].header.seq=0
+				self.final_merge.markers[i].header.stamp=rospy.Time.now()
+				self.final_merge.markers[i].header.frame_id="world"
 
 				# Namespace
-				self.test_merge.markers[i].ns = self.fullmerge.markers[0].ns
+				self.final_merge.markers[i].ns = self.fullmerge.markers[0].ns
 				# Set id 
-				self.test_merge.markers[i].id = i
+				self.final_merge.markers[i].id = i
 				# Type is voxel
-				self.test_merge.markers[i].type = 6
+				self.final_merge.markers[i].type = 6
 				# Action is add 
-				self.test_merge.markers[i].action = 0
+				self.final_merge.markers[i].action = 0
 				# Position is original 
-				self.test_merge.markers[i].pose.position.x = 0.0
-				self.test_merge.markers[i].pose.position.y = 0.0
-				self.test_merge.markers[i].pose.position.z = 0.0
+				self.final_merge.markers[i].pose.position.x = 0.0
+				self.final_merge.markers[i].pose.position.y = 0.0
+				self.final_merge.markers[i].pose.position.z = 0.0
 				# Orientation is original 
-				self.test_merge.markers[i].pose.orientation.x = 0.0
-				self.test_merge.markers[i].pose.orientation.y = 0.0
-				self.test_merge.markers[i].pose.orientation.z = 0.0
-				self.test_merge.markers[i].pose.orientation.w = 1.0
+				self.final_merge.markers[i].pose.orientation.x = 0.0
+				self.final_merge.markers[i].pose.orientation.y = 0.0
+				self.final_merge.markers[i].pose.orientation.z = 0.0
+				self.final_merge.markers[i].pose.orientation.w = 1.0
 
 				# Copy scalars
-				self.test_merge.markers[i].scale.x = merge_list[i][0]
-				self.test_merge.markers[i].scale.y = merge_list[i][0]
-				self.test_merge.markers[i].scale.z = merge_list[i][0]
+				self.final_merge.markers[i].scale.x = merge_list[i][0]
+				self.final_merge.markers[i].scale.y = merge_list[i][0]
+				self.final_merge.markers[i].scale.z = merge_list[i][0]
 
 				# Set colors. 
-				self.test_merge.markers[i].color.r = 1.0
-				self.test_merge.markers[i].color.g = 0.0
-				self.test_merge.markers[i].color.b = 0.0
-				self.test_merge.markers[i].color.a = 1.0
+				self.final_merge.markers[i].color.r = 1.0
+				self.final_merge.markers[i].color.g = 0.0
+				self.final_merge.markers[i].color.b = 0.0
+				self.final_merge.markers[i].color.a = 1.0
 
 				# Frame locked 
-				self.test_merge.markers[i].frame_locked = False
+				self.final_merge.markers[i].frame_locked = False
 
 				# Redimensionalize point and color data 
-				original_length = len(self.test_merge.markers[i].points)
+				original_length = len(self.final_merge.markers[i].points)
 				merged_length = len(merge_list[i][1])
 				#print("ORIGINAL LENGTH", original_length, "MERGED LENGTH", merged_length)
 
 				# Want dimensions EXACTLY the same. 
 				while original_length != merged_length:
-					self.test_merge.markers[i].points.append(Point())
-					self.test_merge.markers[i].colors.append(ColorRGBA())
+					self.final_merge.markers[i].points.append(Point())
+					self.final_merge.markers[i].colors.append(ColorRGBA())
 
 					# Update comparison.
-					original_length = len(self.test_merge.markers[i].points)
+					original_length = len(self.final_merge.markers[i].points)
 
 				rospy.logdebug("DONE REDIMENSIONALIZING for level %s",str(i))
 
 				# Fix point data
 				for point in range(0,merged_length):
 					# Copy points over 
-					self.test_merge.markers[i].points[point].x = merge_list[i][1][point][0]
-					self.test_merge.markers[i].points[point].y = merge_list[i][1][point][1]
-					self.test_merge.markers[i].points[point].z = merge_list[i][1][point][2]
+					self.final_merge.markers[i].points[point].x = merge_list[i][1][point][0]
+					self.final_merge.markers[i].points[point].y = merge_list[i][1][point][1]
+					self.final_merge.markers[i].points[point].z = merge_list[i][1][point][2]
 					# Set colors. 
-					self.test_merge.markers[i].colors[point].r = 1.0
-					self.test_merge.markers[i].colors[point].g = 1.0
-					self.test_merge.markers[i].colors[point].b = 1.0
-					self.test_merge.markers[i].colors[point].a = 1.0
+					self.final_merge.markers[i].colors[point].r = 1.0
+					self.final_merge.markers[i].colors[point].g = 1.0
+					self.final_merge.markers[i].colors[point].b = 1.0
+					self.final_merge.markers[i].colors[point].a = 1.0
 				
 			# Prevent infinite concatenation. 
 			self.merged = True
@@ -948,7 +948,7 @@ class MapAlignment():
 		'''
 		# Merged data Analysis 
 		analysis_data_map = self.fullmerge.markers[0:2]
-		analysis_data_aligned = self.test_merge.markers
+		analysis_data_aligned = self.final_merge.markers
 		analysis_data = [analysis_data_map,analysis_data_aligned]
 
 		### 1. Get elevation data. How many curves working with. 
@@ -1121,7 +1121,7 @@ if __name__ == '__main__':
 				if alignment.merged:
 					alignment.align_pub.publish(alignment.fullmerge)
 
-					alignment.align_pub1.publish(alignment.test_merge)
+					alignment.align_pub1.publish(alignment.final_merge)
 
 					# Analyze the data if enabled Opposite of the analyze boolean.
 					if alignment.analyzed == False:
