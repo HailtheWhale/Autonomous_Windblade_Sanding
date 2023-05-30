@@ -1,6 +1,0 @@
-<launch>
-  <!-- Launches TF publisher for world frame. -->
-  <node pkg="windblade_scanner" type="pointcloud_debug.py" ns="windblade_map" name="pointcloud_debug" output="screen" >
-  </node>
-  
-</launch>

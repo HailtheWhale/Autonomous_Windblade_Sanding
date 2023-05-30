@@ -2,38 +2,39 @@
   <!-- Launches TF publisher for world frame. -->
   <node pkg="windblade_scanner" type="map_alignment.py" name="map_alignment" output="screen" >
       <!-- Topic Parameters -->
-      <param name="loaded_map_topic_turtlebot" value="/occupied_cells_vis_array_loaded_map_turtlebot"/>
+      <param name="reference_map" value="/occupied_cells_vis_array_loaded_map_turtlebot"/>
       <!-- Loaded Map -->
-      <!--
-      <param name="map_topic_rbkairos" value="/occupied_cells_vis_array_loaded_map_rbkairos"/>
-      -->
+      <param name="incoming_map" value="/occupied_cells_vis_array_loaded_map_rbkairos"/>
+      
       <!--Autonomous Mapping-->
+      <!--
       <param name="map_topic_rbkairos" value="/occupied_cells_vis_array_rbkairos"/>
-
+      -->
+      
       <param name="odom_topic" value="/robot/robotnik_base_control/odom"/>
 
       <!-- Merge Waypoint Limits -->
       <!-- The odometry value the node will listen to and wait until gets x y planar value.-->
-      <param name="waypoint_x" value="-5.5"/>
+      <param name="waypoint_x" value="-5.35"/>
       <param name="waypoint_y" value="0.0"/>
-      <param name="waypoint_tol" value="0.1"/>
+      <param name="waypoint_tol" value="0.2"/>
 
       <!-- Loaded Turtlemap Limits -->
-      <param name="xmin_turtle" value="0"/>
-      <param name="xmax_turtle" value="1"/>
-      <param name="ymin_turtle" value="-50"/>
-      <param name="ymax_turtle" value="50"/>
-      <param name="zmin_turtle" value="0.62"/>
-      <param name="zmax_turtle" value="0.77"/>
+      <param name="xmin_reference" value="0"/>
+      <param name="xmax_reference" value="1"/>
+      <param name="ymin_reference" value="-50"/>
+      <param name="ymax_reference" value="50"/>
+      <param name="zmin_reference" value="0.62"/>
+      <param name="zmax_reference" value="0.77"/>
 
       <!-- Loaded Rbkairosmap Limits -->
-      <param name="xmin_rbkairos" value="3.5"/>
-      <param name="xmax_rbkairos" value="6.5"/>
-      <param name="ymin_rbkairos" value="-2"/>
-      <param name="ymax_rbkairos" value="0.0"/>
+      <param name="xmin_incoming" value="3.5"/>
+      <param name="xmax_incoming" value="6.5"/>
+      <param name="ymin_incoming" value="-2"/>
+      <param name="ymax_incoming" value="0.0"/>
       <!-- These NEED to be the same dimensions as the turtlebot-->
-      <param name="zmin_rbkairos" value="0.62"/>
-      <param name="zmax_rbkairos" value="0.77"/>
+      <param name="zmin_incoming" value="0.62"/>
+      <param name="zmax_incoming" value="0.77"/>
   
   </node>
   

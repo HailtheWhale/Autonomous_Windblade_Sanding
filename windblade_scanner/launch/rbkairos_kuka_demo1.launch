@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- Launch RVIZ. -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find windblade_scanner)/rviz/rbkairos_kuka/demo.rviz"/>
+
+  <!-- Launch World Frame. -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/rbkairos_kuka/world_frame/rbkairos_world_basic.launch"/>
+  
+  <!-- Launch Zed Frame -->
+  <include file="$(find windblade_scanner)/launch/2_robot_setup/rbkairos_kuka/zed2i_imu_tracking/zed2i_tracking.launch"/>
+
+</launch>

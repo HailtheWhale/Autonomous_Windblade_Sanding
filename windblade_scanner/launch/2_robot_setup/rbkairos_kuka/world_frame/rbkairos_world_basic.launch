@@ -9,7 +9,7 @@
     <param name="odom_frame" value="/robot_odom"/>
 
     <!-- World Frame Parameters -->
-    <param name="min_frames" value="60"/>
+    <param name="min_frames" value="10"/>
   </node>
   
 </launch>
