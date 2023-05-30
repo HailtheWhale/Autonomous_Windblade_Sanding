@@ -1,0 +1,16 @@
+<launch>
+
+  <!-- Launch Octomap-->
+  <include file="$(find windblade_scanner)/launch/4_octomap/rbkairos_kuka/zed_2i/zed2i_octomap_mapping.launch"/>
+
+  <!-- Load Turtle map-->
+  <include file="$(find windblade_scanner)/launch/4_octomap/map_merge_and_load/map_loaders/octomap_loader_turtlebot.launch"/>
+
+  <!-- Load map Alignment-->
+  <include file="$(find windblade_scanner)/launch/5_map_alignment/rbkairos_kuka/rbkairos_kuka_alignmap.launch"/>
+
+  <!-- Move-->
+  <include file="$(find windblade_scanner)/launch/7_waypoints/rbkairos_kuka/directional_waypoint_seeker.launch"/>
+
+</launch>
+
