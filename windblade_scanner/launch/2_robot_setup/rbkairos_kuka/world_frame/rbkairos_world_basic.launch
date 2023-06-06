@@ -1,4 +1,5 @@
 <launch>
+  <!-- WIP Works, but REQUIRES the robot to detect the code from its starting odom pose-->
   <!-- Launch AruCo Detect Qr code stuff -->
   <include file="$(find windblade_scanner)/launch/2_robot_setup/rbkairos_kuka/world_frame/rbkairos_aruco_detect_qr.launch"/>
   <!-- Launches TF publisher for world frame. -->
