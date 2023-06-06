@@ -1,0 +1,20 @@
+<launch>
+  <!-- These must be redefined based on the port ID's the cameras are plugged into-->
+  <!-- The ROS stream resulting from launching this should identify these whenever the cameras are plugged into
+  The machine -->
+
+  <arg name="camera_id" default="1d27/0601@1/7" />
+  <arg name="depth_registration" default="false" />
+ 
+  <arg name="camera_name" default="camera1" />
+
+  <!-- Camera 1 -->
+  <include file="$(find openni2_launch)/launch/openni2.launch" >
+    <arg name="device_id" value="$(arg camera_id)" />
+    <arg name="camera" value="$(arg camera_name)" />
+    <!-- The main launch file will take care of the tfs-->
+    <arg name="depth_registration" value="$(arg depth_registration)" />
+    <arg name="publish_tf" value="false"/>
+  </include>
+
+</launch>

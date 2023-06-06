@@ -1,7 +1,7 @@
 <launch>
 
   <!-- Read launch arguments -->
-  <param name="waypoint_file" value="$(find windblade_scanner)/config/7_waypoints/forward_turtlebot_path.txt"/>
+  <param name="waypoint_file" value="$(find windblade_scanner)/cfg/7_waypoints/turtlebot/forward_turtlebot_path.txt"/>
   <!-- Waypoint Driver node -->
   <node pkg="windblade_scanner" type="node.py" name="waypoint_seeker" output="screen">
     <!-- Set the arguments to parameters -->

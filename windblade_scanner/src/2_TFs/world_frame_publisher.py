@@ -26,7 +26,6 @@ class WorldPub():
         self.node_name = "world_frame_publisher/"
         # Parameters
         # Define distance from marker for waypoint 
-        print(rospy.get_param(self.node_name + "waypoint_dist"))
         self.waypoint_dist = float(rospy.get_param(self.node_name + "waypoint_dist"))
         # Define number of measurements must be taken before the 
         # ArUco Marker frames will be set
@@ -77,8 +76,8 @@ class WorldPub():
         self.cmd_vel.linear.z=0
 
         # Turning and linear spds 
-        self.turn_spd = 0.0
-        self.linear_spd = 0.0
+        self.turn_spd = 0.13
+        self.linear_spd = 0.05
 
         # Finished turning
         self.finished_turning = False
@@ -458,11 +457,11 @@ class WorldPub():
         turn_spd = self.turn_spd
 
         while not self.started_rot:
-	    self.cmd_vel.linear.x = 0.0		
+            self.cmd_vel.linear.x = 0.0		
             self.cmd_vel.angular.z = turn_spd
             self.cmd_vel_pub.publish(self.cmd_vel)
-            #rospy.logdebug("Starting Rotation...")
-            # rospy.logdebug(self.orient_theta)
+            rospy.logdebug("Starting Rotation...")
+            rospy.logdebug(self.orient_theta)
             if (self.orient_theta >= 0.15 and self.orient_theta <= 6.18):
                 self.started_rot = True
 
@@ -470,7 +469,7 @@ class WorldPub():
             #rospy.logdebug("NOT DONE SPINNING")
 
             # Rotate
-	    self.cmd_vel.linear.x = 0.0		
+            self.cmd_vel.linear.x = 0.0		
             self.cmd_vel.angular.z = turn_spd
             self.cmd_vel_pub.publish(self.cmd_vel)
 
@@ -497,7 +496,7 @@ class WorldPub():
 
         # Stop robot 
         self.cmd_vel.angular.z = 0
-	self.cmd_vel.linear.x = 0.0
+        self.cmd_vel.linear.x = 0.0
         self.cmd_vel_pub.publish(self.cmd_vel)
 
     def traveler(self, found_bearing = False, close_enough = True, close_enough_dist = 0.25):
@@ -573,6 +572,7 @@ class WorldPub():
 ######################################################
 
     def world_setter(self):
+        rospy.loginfo("WORLD SETTER")
         # Find 1st World frame 
         self.spin()
 #################################################

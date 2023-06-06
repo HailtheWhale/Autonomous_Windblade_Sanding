@@ -1,8 +1,9 @@
 <launch>
   <!-- Launch AruCo Detect Qr code stuff -->
   <arg name="camera_num" default="2"/>
+  
   <include file="$(find windblade_scanner)/launch/2_robot_setup/turtlebot/world_frame/asus_xtion_pro/asus_xtion_pro_aruco_detect_qr$(arg camera_num).launch"/>
-
+  
   <!-- Launches TF publisher for world frame. -->
   <node pkg="windblade_scanner" type="world_frame_publisher.py" name="world_frame_publisher" output="screen" >
     <!-- Topic Parameters -->

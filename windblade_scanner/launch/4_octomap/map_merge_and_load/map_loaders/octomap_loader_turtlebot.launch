@@ -9,7 +9,7 @@
 <launch>
 
 	<node pkg="octomap_server" type="octomap_server_node" name="octomap_loaded_map_server_turtlebot" output="screen">
-		<param name="map_file" value="$(find windblade_scanner)/maps/turtlebot/3D/turtle_map_1.bt" />
+		<param name="map_file" value="$(find windblade_scanner)/maps/turtlebot/3D/windblade_under_bi.bt" />
 		<param name="frame_id" type="string" value="world" />
 		<!-- Remappings -->
 		<remap from="occupied_cells_vis_array" to="occupied_cells_vis_array_loaded_map_turtlebot"/>
