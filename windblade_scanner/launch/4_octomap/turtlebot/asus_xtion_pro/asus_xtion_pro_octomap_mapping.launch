@@ -22,7 +22,7 @@
 		<!-- Filter workspace -->
 		<param name="filter_ground" value="false"/>
 
-		<param name="pointcloud_min_x" value="-0.5"/>
+		<param name="pointcloud_min_x" value="0.1"/>
 		<param name="pointcloud_max_x" value="1.6"/>
 		<param name="pointcloud_min_y" value="3.25"/>
 		<param name="pointcloud_max_y" value="6.55"/>

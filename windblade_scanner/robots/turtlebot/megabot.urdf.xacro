@@ -17,6 +17,6 @@
   <!-- Calling Kobuki Base Model  -->
   <xacro:kobuki/>
   <xacro:stack_hexagons   parent="base_link"/>
-  <xacro:sensor_xtion_pro_cam parent="base_link" xtion_pro_cam_py="0.0205" camera_number="1" xyz="0 -0.13 0.8428" rpy="0.0 0.3487 -1.57"/>
-  <xacro:sensor_xtion_pro_cam parent="base_link" xtion_pro_cam_py="0.0205" camera_number="2" xyz="0.1 0.0185 0.48" rpy="0 0.25 0"/>
+  <xacro:sensor_xtion_pro_cam parent="base_link" xtion_pro_cam_py="0.0205" camera_number="1" xyz="0 -0.13 0.15" rpy="0.0 -0.545 -1.57"/>
+  <xacro:sensor_xtion_pro_cam parent="base_link" xtion_pro_cam_py="0.0205" camera_number="2" xyz="0.1 0.0 0.15" rpy="0.0 -0.49 0.0"/>
 </robot>
