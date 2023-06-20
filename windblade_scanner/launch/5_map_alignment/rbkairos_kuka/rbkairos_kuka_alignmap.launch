@@ -1,11 +1,16 @@
 <launch>
+
+  <!-- Z levels for BOTH maps -->
+  <arg name="z_min"              default="0.62" />
+  <arg name="z_max"              default="0.77" />
+
   <!-- Launches TF publisher for world frame. -->
   <node pkg="windblade_scanner" type="map_alignment.py" name="map_alignment" output="screen" >
       <!-- Topic Parameters -->
       <param name="reference_map" value="/occupied_cells_vis_array_loaded_map_turtlebot"/>
       <!-- Loaded Map -->
       <param name="incoming_map" value="/occupied_cells_vis_array_loaded_map_rbkairos"/>
-      
+
       <!--Autonomous Mapping-->
       <!--
       <param name="map_topic_rbkairos" value="/occupied_cells_vis_array_rbkairos"/>
@@ -20,22 +25,45 @@
       <param name="waypoint_tol" value="0.2"/>
 
       <!-- Loaded Turtlemap Limits -->
+      <!--
       <param name="xmin_reference" value="0"/>
       <param name="xmax_reference" value="1"/>
       <param name="ymin_reference" value="-50"/>
       <param name="ymax_reference" value="50"/>
-      <param name="zmin_reference" value="0.62"/>
-      <param name="zmax_reference" value="0.77"/>
+      <param name="zmin_reference" value=$(arg z_min)/>
+      <param name="zmax_reference" value=$(arg z_max)/>
+      -->
 
       <!-- Loaded Rbkairosmap Limits -->
+      <!--
       <param name="xmin_incoming" value="3.5"/>
       <param name="xmax_incoming" value="6.5"/>
       <param name="ymin_incoming" value="-2"/>
       <param name="ymax_incoming" value="0.0"/>
-      <!-- These NEED to be the same dimensions as the turtlebot-->
-      <param name="zmin_incoming" value="0.62"/>
-      <param name="zmax_incoming" value="0.77"/>
-  
+      -->
+      <!--
+      <param name="zmin_incoming" value=$(arg z_min)/>
+      <param name="zmax_incoming" value=$(arg z_max)/>
+      -->
+
+
+      <!-- Combining turtlebot/3D/merged_map.bt & turtlebot/3D/windblade_under_bi.bt-->
+      <!-- Loaded Turtlemap (REFERENCE) (TOP MAP) Limits -->
+      <param name="xmin_reference" value="1.2"/>
+      <param name="xmax_reference" value="50.0"/>
+      <param name="ymin_reference" value="-0.5"/>
+      <param name="ymax_reference" value="0.4"/>
+      <param name="zmin_reference" value="$(arg z_min)"/>
+      <param name="zmax_reference" value="$(arg z_max)"/>
+
+      <!-- Loaded Rbkairosmap (INCOMING) (BOTTOM MAP) Limits -->
+      <param name="xmin_incoming" value="0.0"/>
+      <param name="xmax_incoming" value="1.0"/>
+      <param name="ymin_incoming" value="3.9"/>
+      <param name="ymax_incoming" value="6.2"/>
+      <param name="zmin_incoming" value="$(arg z_min)"/>
+      <param name="zmax_incoming" value="$(arg z_max)"/>
+
   </node>
   
 </launch>

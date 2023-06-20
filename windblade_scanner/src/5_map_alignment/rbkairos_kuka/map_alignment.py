@@ -74,8 +74,8 @@ class MapAlignment():
 		self.odom_sub=rospy.Subscriber(self.odom, Odometry,self.waypoint_checker)
 
 
-		self.align_pub1 = rospy.Publisher("/occupied_cells_loaded_map_scrubbed_turtle",MarkerArray, queue_size=1)
-		self.align_pub2 = rospy.Publisher("/occupied_cells_map_scrubbed_rbkairos",MarkerArray, queue_size=1)
+		self.align_pub1 = rospy.Publisher("/final_map_info_ref",MarkerArray, queue_size=1)
+		self.align_pub2 = rospy.Publisher("/final_map_info_inc",MarkerArray, queue_size=1)
 		self.align_pub = rospy.Publisher("/occupied_cells_map_scrubbed_merged",MarkerArray, queue_size=1)
 
 		# Msgs
@@ -150,7 +150,7 @@ class MapAlignment():
 					self.at_waypoint = True
 
 ##########################
-### Turtle scrubber
+### REFERENCE (Turtle) scrubber
 ##########################
 	def reference_map_scrubber(self, msg):
 		# ONLY want 1 MSG. 
@@ -173,7 +173,7 @@ class MapAlignment():
 
 			# Save Raw Data
 			self.loaded_map_info_reference.markers = [loaded_info_array1[15],loaded_info_array1[16]]
-			#rospy.logdebug("BASE MAP LENGTH %s",str(len(self.loaded_map_info_reference.markers[1].points)))
+			rospy.logdebug("REFERENCE | Loaded Data length 15: %s | 16: %s",str(len(self.loaded_map_info_reference.markers[0].points)),str(len(self.loaded_map_info_reference.markers[1].points)))
 
 			############################
 			# RANGE FILTER
@@ -210,7 +210,7 @@ class MapAlignment():
 					index = anomoly_list_range1[i][1]-i
 					del self.loaded_map_info_reference.markers[array].points[index]
 					del self.loaded_map_info_reference.markers[array].colors[index]
-				rospy.logdebug("Scrubbed Length for level %s of the REFERENCE map is: %s", str(array),str(len(self.loaded_map_info_reference.markers[array].points)))
+				rospy.logdebug("REFERENCE | Scrubbed Length for level %s of the REFERENCE map is: %s", str(array),str(len(self.loaded_map_info_reference.markers[array].points)))
 			
 			# Save Data
 			self.final_map_info_reference.markers = self.loaded_map_info_reference.markers
@@ -247,8 +247,8 @@ class MapAlignment():
 			for i in range(0,z_counter1):
 				contour_data1.append((z_level1[i],[[],[]]))
 
-			rospy.logdebug("Voxel elevation count for the REFERENCE map is : %s", str(z_counter1))
-			rospy.logdebug("Voxel elevations for the REFERENCE map are : %s", str(z_level1))
+			rospy.logdebug("REFERENCE | Voxel elevation count for the REFERENCE map is: %s", str(z_counter1))
+			rospy.logdebug("REFERENCE | Voxel elevations for the REFERENCE map are: %s", str(z_level1))
 
 			# Resort Data for Curve Fitting based on voxel grid elevation.
 			for i in range(0,len(voxel_list1)):
@@ -263,7 +263,7 @@ class MapAlignment():
 			self.contour_data[0] = contour_data1
 
 ###########################
-### Rbkairos scrubber
+### INCOMING (Kuka Base) scrubber
 ###########################
 	def incoming_map_scrubber(self, msg):
 		rospy.loginfo("LOADED incoming map.")
@@ -280,17 +280,18 @@ class MapAlignment():
 			for i in range(0,len(loaded_info_array2)):
 				item = (i, len(loaded_info_array2[i].points), len(loaded_info_array2[i].colors))
 				info_size_list2.append(item)
-				#rospy.loginfo("Rbkairos %s",str(i))
-			#rospy.loginfo("Rbkairos List %s",str(info_size_list2))
+			rospy.logdebug("Rbkairos List %s",str(info_size_list2))
 			'''
 			# Save Raw Data
 			self.loaded_map_info_incoming.markers = [loaded_info_array2[15],loaded_info_array2[16]]
+			rospy.logdebug("INCOMING | Loaded Data length 15: %s | 16: %s",str(len(self.loaded_map_info_incoming.markers[0].points)),str(len(self.loaded_map_info_incoming.markers[1].points)))
 
 			############################
 			# RANGE FILTER
 			############################
 
 			for array in range(0,len(self.loaded_map_info_incoming.markers)):
+				#rospy.logdebug("Incoming scrub loop iteration %s", str(array))
 				anomoly_count_range2 = 0
 				anomoly_list_range2 = []
 
@@ -312,7 +313,7 @@ class MapAlignment():
 					del self.loaded_map_info_incoming.markers[array].points[index]
 					del self.loaded_map_info_incoming.markers[array].colors[index]
 
-				rospy.logdebug("Scrubbed Length for level %s of the INCOMING map is: %s", str(array),str(len(self.loaded_map_info_reference.markers[array].points)))
+				rospy.logdebug("INCOMING | Scrubbed Length for level %s of the INCOMING map is: %s", str(array),str(len(self.loaded_map_info_incoming.markers[array].points)))
 
 			# Save Data
 			self.final_map_info_incoming.markers = self.loaded_map_info_incoming.markers
@@ -347,8 +348,8 @@ class MapAlignment():
 			for i in range(0,z_counter2):
 				contour_data2.append((z_level2[i],[[],[]]))
 
-			rospy.logdebug("Voxel elevation count for the INCOMING map is : %s", str(z_counter2))
-			rospy.logdebug("Voxel elevations for the INCOMING map are : %s", str(z_level2))
+			rospy.logdebug("INCOMING | Voxel elevation count for the INCOMING map is: %s", str(z_counter2))
+			rospy.logdebug("INCOMING | Voxel elevations for the INCOMING map are: %s", str(z_level2))
 
 			# Resort Data for Curve Fitting
 			for i in range(0,len(voxel_list2)):
@@ -365,8 +366,12 @@ class MapAlignment():
 ##############################################
 # Map Align Part II: Countour Map Creation
 ##############################################
-	def feature_finder(self,data,map_name="turtlebot", visualize=False,lower_h_limit=7):
-		rospy.loginfo("Searching for features for %s map.",str(map_name).upper())
+	def feature_finder(self,data,map_name="map", visualize=False,lower_h_limit=7, upper_h_limit = 15, fig = 1):
+		rospy.loginfo("%s map feature searching | Lower elevation limit: %s | Upper limit: %s",str(map_name).upper(),str(lower_h_limit),str(upper_h_limit))
+		if upper_h_limit > len(data):
+			rospy.logwarn("Length of elevation data is %s. The entered upper limit is %s, which is higher. Defaulting to the highest elevation.", str(len(data)), str(upper_h_limit))
+			upper_h_limit = len(data)
+
 		# ONLY Feature extract if NOT visualizing. 
 		# IF visualizing, then NOT appending data to feature extraction list.
 
@@ -377,12 +382,13 @@ class MapAlignment():
 		index_list = []
 		# Getting color gradient for visualization
 		red = Color("red")
-		colors=list(red.range_to(Color("green"),(len(data)+1)))
-
+		colors=list(red.range_to(Color("green"),(len(data)+1)))		
+		
 		# Pull in contour data 
-		for h in range(lower_h_limit,len(data)): # Step = 4
+		for h in range(lower_h_limit,upper_h_limit): # Step = 4
 			x_data = np.array(data[h][1][0])
 			y_data = np.array(data[h][1][1])
+			rospy.logdebug("%s map DEBUG | x_data length %s | y_data length %s",str(map_name).upper(),str(len(x_data)),str(len(y_data)))
 			# Plotting an ellipse for each. 
 			# Need params for each ellipse. 
 			v = self.fit_ellipse(x_data,y_data)
@@ -393,9 +399,11 @@ class MapAlignment():
 			#print("Axes Gains are a: ", ellipse_data[2]," | b: ", ellipse_data[3])
 			#print("Tilt is: ",ellipse_data[4]," degrees")
 			########################################
+			'''
 			## Get the arrays needed to plot the ellipse.
 			t = np.linspace(0,2*3.14,100)
 			Ell = np.array([ellipse_data[2]*np.cos(t),ellipse_data[3]*np.sin(t)])
+			rospy.logdebug("%s map DEBUG | Ellipse array length %s",str(map_name).upper(),str(Ell))
 
 			########################################
 			# WIP. Need to fix this. 
@@ -403,9 +411,12 @@ class MapAlignment():
 			#for i in range(Ell.shape[1]):
 			#	Ell_rot[:,i]=np.dot(ellipse_data[5],Ell[:,i])
 			########################################
+			'''
 			if visualize:
+				t = np.linspace(0,2*3.14,100)
+				Ell = np.array([ellipse_data[2]*np.cos(t),ellipse_data[3]*np.sin(t)])
 				## Plot
-				plt.figure(1)
+				plt.figure(fig)
 				self.plot = plt.plot(ellipse_data[0]+Ell[0,:],ellipse_data[1]+Ell[1,:],color=str(colors[h-1]))
 				plt.scatter(x_data,y_data,color=str(colors[h-1]))
 				#plt.scatter(ellipse_data[0],ellipse_data[1],color=str(colors[h-1]))
@@ -423,6 +434,13 @@ class MapAlignment():
 			b_list.append(ellipse_data[3])
 			ell_center.append((ellipse_data[0],ellipse_data[1]))
 			index_list.append(h)
+
+		rospy.logwarn("||||||||||||||||||||||")
+		rospy.logdebug("%s map DEBUG | a_list %s",str(map_name).upper(),str(len(a_list)))
+		rospy.logdebug("%s map DEBUG | b_list %s",str(map_name).upper(),str(len(b_list)))
+		rospy.logdebug("%s map DEBUG | ellipse center %s",str(map_name).upper(),str(len(ell_center)))
+		rospy.logdebug("%s map DEBUG | index_list %s",str(map_name).upper(),str(len(index_list)))
+		rospy.logwarn("||||||||||||||||||||||")
 
 ##############################################
 # Map Align Part III: Countour Map Feature Creation
@@ -447,6 +465,7 @@ class MapAlignment():
 				y1 = ell_center[i][1]
 				y2 = y1
 				stretch_in = "a"
+				rospy.logdebug("%s map DEBUG | stretch in a DIR.",str(map_name).upper())
 			# else, y is elongated
 			else:
 				x1 = ell_center[i][0]
@@ -454,6 +473,7 @@ class MapAlignment():
 				y1 = ell_center[i][1]+b
 				y2 = ell_center[i][1]-b
 				stretch_in = "b"
+				rospy.logdebug("%s map DEBUG | stretch in b DIR.",str(map_name).upper())
 
 			# Save Data 
 			x1_list.append(x1)
@@ -529,6 +549,8 @@ class MapAlignment():
 				feature_list.append([x,y,0])
 			#///////////
 
+		rospy.loginfo("%s map DEBUG | Visualizing %s",str(map_name).upper(), str(visualize))
+		
 		# If visualizing, then will not be appending data to be used for alignment.
 		# Otherwise, appending data. 
 		if not visualize:
@@ -545,18 +567,21 @@ class MapAlignment():
 
 			# AT this point, can select any countour. 
 			# Going to select the last one (The highest elevated one) from the list.
-			self.features.append([map_name,feature_list[-1],feature_list_offset[-1]])
+			if len(feature_list) == 0 or len(feature_list_offset) == 0:
+				rospy.logfatal("NO FEATURES FOUND. Length of feature list is %s. Length of feature offset is %s.",str(len(feature_list)),str(len(feature_list_offset)))
+			else:
+				self.features.append([map_name,feature_list[-1],feature_list_offset[-1]])
 
-			## Find the nearest voxels to these points.
-			# Select newest added features.
-			voxel_size = 0.01
-			for i in range(1,3):
-				voxel_x = round(round(self.features[-1][i][0]/voxel_size,0)*voxel_size,3)
-				voxel_y = round(round(self.features[-1][i][1]/voxel_size,0)*voxel_size,3)
-				self.features[-1][i][0] = voxel_x
-				self.features[-1][i][1] = voxel_y
-		
-			rospy.loginfo("Features found for %s map.",str(map_name).upper())
+				## Find the nearest voxels to these points.
+				# Select newest added features.
+				voxel_size = 0.01
+				for i in range(1,3):
+					voxel_x = round(round(self.features[-1][i][0]/voxel_size,0)*voxel_size,3)
+					voxel_y = round(round(self.features[-1][i][1]/voxel_size,0)*voxel_size,3)
+					self.features[-1][i][0] = voxel_x
+					self.features[-1][i][1] = voxel_y
+			
+				rospy.loginfo("Features found for %s map.",str(map_name).upper())
 
 		# For external use if visualizing.
 		else:
@@ -621,20 +646,131 @@ class MapAlignment():
 		return(cc[0],cc[1],axes[0],axes[1],deg,inve)
 
 ##############################################
-# Map Align Part IV: Map Alignment
+# Map Align Part IVa: Full Map Concatenation
 ##############################################
-	def align_maps(self):
+	def map_concatenated(self,num_maps=2):
+
+		# Get Unique Resolution Sizes (Assume cubic voxels. Assume same dimensions.)
+		res_list = []
+		for i in range(0,len(self.final_map_info_reference.markers)):
+			if self.final_map_info_reference.markers[i].scale.x not in res_list:
+				res_list.append(self.final_map_info_reference.markers[i].scale.x)
+			if self.loaded_map_info_reference.markers[i].scale.x not in res_list:
+				res_list.append(self.loaded_map_info_reference.markers[i].scale.x)
+		rospy.logdebug("map_concatenated DEBUG | RES_LIST REALIGNED contents: %s", str(res_list))
+
+		# Make the merged marker array. Based on number of maps merging. 
+		for i in range(0,int(len(self.final_map_info_reference.markers))*num_maps):
+			self.fullmerge.markers.append(Marker())
+		rospy.logdebug("map_concatenated DEBUG | MERGED array REALIGNED LENGTH: %s", str(len(self.fullmerge.markers)))
+
+		# Create fullmerge marker array
+		for i in range(0,len(self.fullmerge.markers)):
+			########
+			# Set Header 
+			self.fullmerge.markers[i].header.seq=0
+			self.fullmerge.markers[i].header.stamp=rospy.Time.now()
+			self.fullmerge.markers[i].header.frame_id="world"
+
+			# Namespace
+			self.fullmerge.markers[i].ns = self.final_map_info_reference.markers[0].ns
+			# Set id 
+			self.fullmerge.markers[i].id = i
+			# Type is voxel
+			self.fullmerge.markers[i].type = 6
+			# Action is add 
+			self.fullmerge.markers[i].action = 0
+			# Position is original 
+			self.fullmerge.markers[i].pose.position.x = 0.0
+			self.fullmerge.markers[i].pose.position.y = 0.0
+			self.fullmerge.markers[i].pose.position.z = 0.0
+			# Orientation is original 
+			self.fullmerge.markers[i].pose.orientation.x = 0.0
+			self.fullmerge.markers[i].pose.orientation.y = 0.0
+			self.fullmerge.markers[i].pose.orientation.z = 0.0
+			self.fullmerge.markers[i].pose.orientation.w = 1.0
+
+			# Copy scalars
+			if i in [0,2]:
+				#rospy.logdebug("ITEM is %s for %s", str(res_list[0]), str(i))
+				self.fullmerge.markers[i].scale.x = res_list[0]
+				self.fullmerge.markers[i].scale.y = res_list[0]
+				self.fullmerge.markers[i].scale.z = res_list[0]
+			elif i in [1,3]:
+				#rospy.logdebug("ITEM is %s for %s", str(res_list[1]), str(i))
+				self.fullmerge.markers[i].scale.x = res_list[1]
+				self.fullmerge.markers[i].scale.y = res_list[1]
+				self.fullmerge.markers[i].scale.z = res_list[1]
+			else:
+				rospy.logwarn("map_concatenated DEBUG | Error in map alignment. Could not copy scalars to template list.")
+
+			# Set colors. 
+			self.fullmerge.markers[i].color.r = 1.0
+			self.fullmerge.markers[i].color.g = 0.0
+			self.fullmerge.markers[i].color.b = 0.0
+			self.fullmerge.markers[i].color.a = 1.0
+
+			# Frame locked 
+			self.fullmerge.markers[i].frame_locked = False
+
+			pt_counter = 0
+			# Copy Voxel point data.
+			if i in [0,1]:
+				while len(self.fullmerge.markers[i].points) < len(self.final_map_info_reference.markers[i].points):
+					# Points
+					self.fullmerge.markers[i].points.append(Point())
+					self.fullmerge.markers[i].points[-1].x=self.final_map_info_reference.markers[i].points[pt_counter].x
+					self.fullmerge.markers[i].points[-1].y=self.final_map_info_reference.markers[i].points[pt_counter].y
+					self.fullmerge.markers[i].points[-1].z=self.final_map_info_reference.markers[i].points[pt_counter].z
+
+					# Colors
+					self.fullmerge.markers[i].colors.append(ColorRGBA())
+					self.fullmerge.markers[i].colors[pt_counter].r = 1.0
+					self.fullmerge.markers[i].colors[pt_counter].g = 1.0
+					self.fullmerge.markers[i].colors[pt_counter].b = 1.0
+					self.fullmerge.markers[i].colors[pt_counter].a = 1.0
+
+					# Update counter
+					pt_counter+=1
+
+			elif i in [2,3]:
+				while len(self.fullmerge.markers[i].points) < len(self.final_map_info_incoming.markers[i-num_maps].points):
+					# Points
+					self.fullmerge.markers[i].points.append(Point())
+					self.fullmerge.markers[i].points[-1].x=self.final_map_info_incoming.markers[i-num_maps].points[pt_counter].x
+					self.fullmerge.markers[i].points[-1].y=self.final_map_info_incoming.markers[i-num_maps].points[pt_counter].y
+					self.fullmerge.markers[i].points[-1].z=self.final_map_info_incoming.markers[i-num_maps].points[pt_counter].z
+
+					# Colors
+					self.fullmerge.markers[i].colors.append(ColorRGBA())
+					self.fullmerge.markers[i].colors[pt_counter].r = 1.0
+					self.fullmerge.markers[i].colors[pt_counter].g = 1.0
+					self.fullmerge.markers[i].colors[pt_counter].b = 1.0
+					self.fullmerge.markers[i].colors[pt_counter].a = 1.0
+
+					# Update counter
+					pt_counter+=1
+			else:
+				rospy.logfatal("map_concatenated FATAL | Out of index range. Cannot make voxels. ")
+
+			rospy.logdebug("map_concatenated DEBUG | Length of concat points is: %s | Length of concat colors is %s", str(len(self.fullmerge.markers[i].points)), str(len(self.fullmerge.markers[i].colors)))
+
+##############################################
+# Map Align Part IVb: Map Alignment
+##############################################
+	def align_maps(self, dxi = 0, dyi = 0, dzi = 0):
+			# dxi, dyi, dzi inputs are for manual tuning if desired. 
 			if len(self.final_map_info_incoming.markers) > 0 and len(self.final_map_info_reference.markers) > 0:
 				rospy.loginfo("Attempting map alignment.")
 
 			# 1. Combine voxels will be using into 1 full map. 
-				'''
-				WIP. This COPIES the reference map object, and ALL modifications done to this 
-				will happen to said object. NEED to fix to avoid unintended bugs. 
+				self.map_concatenated(num_maps=2)
+
 				'''
 				self.fullmerge.markers = self.final_map_info_reference.markers
 				for i in range (0,len(self.final_map_info_incoming.markers)):
 					self.fullmerge.markers.append(self.final_map_info_incoming.markers[i])
+				'''
 
 			# 2. Search for Translation Offset
 				# TRANSLATING the RbKairos Outermost point [1][2] to the Turtle [0][2]
@@ -644,29 +780,33 @@ class MapAlignment():
 				dx = round(map_feature_1[0]-moving_feature_1[0],3)
 				dy = round(map_feature_1[1]-moving_feature_1[1],3)
 
-				# APPLY Offset
-				#rospy.logdebug("ALIGNMENT Rbkairos point BEFORE Translation %s", str(self.fullmerge.markers[3].points[0]))
-
+				# APPLY TRANSLATION Offset
+				rospy.logdebug("map_alignment DEBUG | dx %s | dy %s |", str(dx),str(dy))
+				rospy.logdebug("map_alignment DEBUG | x BEFORE TRANS %s | y BEFORE TRANS %s |", str(self.fullmerge.markers[2].points[0].x),str(self.fullmerge.markers[2].points[0].y))
 				for i in range(2,4):
 					for point in range(0,len(self.fullmerge.markers[i].points)):
 						x = self.fullmerge.markers[i].points[point].x
-						x+=dx
+						x+=(dx+dxi)
 						self.fullmerge.markers[i].points[point].x = x
 						y = self.fullmerge.markers[i].points[point].y
-						y+=dy
+						y+=(dy+dyi)
 						self.fullmerge.markers[i].points[point].y = y
+						# Manual z offset (WIP to Automate.)
+						z = self.fullmerge.markers[i].points[point].z
+						z+=dzi
+						self.fullmerge.markers[i].points[point].z = z
 
-				#rospy.loginfo("ALIGNMENT Rbkairos point AFTER Translation %s", str(self.fullmerge.markers[3].points[0]))
+				rospy.logdebug("map_alignment DEBUG | x AFTER TRANS %s | y AFTER TRANS %s |", str(self.fullmerge.markers[2].points[0].x),str(self.fullmerge.markers[2].points[0].y))
 
 			# 3. Search for Rotation Offset
 				# ROTATING the RbKairos Outermost point [1][1] to the Turtle [0][1]
 				map_feature_2 = self.features[0][1]
 				moving_feature_2 = self.features[1][1]
 				## Need to apply offset to moving features too. 
-				rospy.logdebug("ROTATE FEATURES BEFORE | %s | %s |", str(map_feature_2),str(moving_feature_2))
+				rospy.logdebug("map_alignment DEBUG | ROTATE FEATURES BEFORE | %s | %s |", str(map_feature_2),str(moving_feature_2))
 				moving_feature_2[0]= round(moving_feature_2[0]+dx,3)
 				moving_feature_2[1]= round(moving_feature_2[1]+dy,3)
-				rospy.logdebug("ROTATE FEATURES AFTER | %s | %s |", str(map_feature_2),str(moving_feature_2))
+				rospy.logdebug("map_alignment DEBUG | ROTATE FEATURES AFTER | %s | %s |", str(map_feature_2),str(moving_feature_2))
 
 				## Need to Determine the angle offset to get from the Rbkairos point to the 
 				## Turtle point. 
@@ -680,7 +820,7 @@ class MapAlignment():
 				angle_map = math.atan2(y_map,x_map)
 				angle_moving = math.atan2(y_moving,x_moving)
 				angle_diff = angle_moving-angle_map
-				rospy.logdebug("THE INCOMING map must be rotated %s radians", str(angle_diff))
+				rospy.logdebug("map_alignment DEBUG | THE INCOMING map must be rotated %s radians", str(angle_diff))
 
 				## Apply this offset to each point in Rbkairos Map 
 				for i in range(2,4):
@@ -741,6 +881,7 @@ class MapAlignment():
 			'''
 
 			# Redefine Some Stuff 
+			'''
 			for i in range(0,len(self.fullmerge.markers)):
 				#print(self.fullmerge.markers[i].color)
 				self.fullmerge.markers[i].id = i
@@ -756,6 +897,7 @@ class MapAlignment():
 					self.fullmerge.markers[i].color.g = 1.0
 					self.fullmerge.markers[i].color.b = 0.0
 					self.fullmerge.markers[i].color.a = 1.0
+			'''
 
 			# Get Resolution Sizes (Assume cubic voxels)
 			res_list = []
@@ -846,7 +988,7 @@ class MapAlignment():
 						merge_list2[item][num]=float(merge_list2[item][num])
 
 				time_diff = rospy.get_time()-time_start
-				rospy.logdebug("Time Diff for SET MERGING at level %s is %s Seconds.", str(i), str(time_diff))
+				rospy.logdebug("Map Merge DEBUG | Time Diff for SET MERGING at level %s is %s Seconds.", str(i), str(time_diff))
 
 				# Save
 				merge_list[i][1] = merge_list2
@@ -858,8 +1000,8 @@ class MapAlignment():
 				item = (i, len(self.fullmerge.markers[i].points), len(self.fullmerge.markers[i].colors))
 				info_size_list2.append(item)
 
-			rospy.logdebug("ORIGINAL List by Size | Voxel size: %s, Length %s | Voxel size: %s, Length %s",str(merge_list[0][0]),str(info_size_list2[0][1]+info_size_list2[2][1]),str(merge_list[1][0]),str(info_size_list2[1][1]+info_size_list2[3][1]))
-			rospy.logdebug("MERGED List by Size | Voxel size: %s, Length %s | Voxel size: %s, Length %s",str(merge_list[0][0]), str(len(merge_list[0][1])), str(merge_list[1][0]), str(len(merge_list[1][1])))
+			rospy.logdebug("Map Merge DEBUG | ORIGINAL List by Size | Voxel size: %s, Length %s | Voxel size: %s, Length %s",str(merge_list[0][0]),str(info_size_list2[0][1]+info_size_list2[2][1]),str(merge_list[1][0]),str(info_size_list2[1][1]+info_size_list2[3][1]))
+			rospy.logdebug("Map Merge DEBUG | MERGED List by Size | Voxel size: %s, Length %s | Voxel size: %s, Length %s",str(merge_list[0][0]), str(len(merge_list[0][1])), str(merge_list[1][0]), str(len(merge_list[1][1])))
 
 			# Make the merged marker array.
 			for i in range(0,2):
@@ -916,7 +1058,7 @@ class MapAlignment():
 					# Update comparison.
 					original_length = len(self.final_merge.markers[i].points)
 
-				rospy.logdebug("DONE REDIMENSIONALIZING for level %s",str(i))
+				rospy.logdebug("Map Merge DEBUG | DONE REDIMENSIONALIZING for level %s",str(i))
 
 				# Fix point data
 				for point in range(0,merged_length):
@@ -960,7 +1102,6 @@ class MapAlignment():
 		z_data = [[[],[]],[[],[]]]
 		for data in range(0,len(analysis_data)):
 			for marker in range(0,len(analysis_data[data])):
-				#print(marker)
 				for i in range(0,len(analysis_data[data][marker].points)):					
 					x = round(analysis_data[data][marker].points[i].x,3)
 					y = round(analysis_data[data][marker].points[i].y,3)
@@ -981,15 +1122,17 @@ class MapAlignment():
 				for i in range(0,z_counter[data][marker]):
 					contour_data[data][marker].append((z_level[data][marker][i],[[],[]]))
 
-		rospy.logdebug("||||||| \n Z_count map1 is %s", str(z_counter[0][0]))
-		rospy.logdebug("Z_count aligned1 is %s", str(z_counter[1][0]))
-		rospy.logdebug("Z_level map1 is %s", str(z_level[0][0]))
-		rospy.logdebug("Z_level aligned1 is %s\n |||||||", str(z_level[1][0]))
-
-		rospy.logdebug("Z_count map2 is %s", str(z_counter[0][1]))
-		rospy.logdebug("Z_count aligned2 is %s", str(z_counter[1][1]))
-		rospy.logdebug("Z_level map2 is %s", str(z_level[0][1]))
-		rospy.logdebug("Z_level aligned2 is %s\n |||||||", str(z_level[1][1]))
+		rospy.logwarn("|||||||||||||||||||||")
+		rospy.logdebug("Map Analysis DEBUG | Z_count map1 is %s", str(z_counter[0][0]))
+		rospy.logdebug("Map Analysis DEBUG | Z_count aligned1 is %s", str(z_counter[1][0]))
+		rospy.logdebug("Map Analysis DEBUG | Z_level map1 is %s", str(z_level[0][0]))
+		rospy.logdebug("Map Analysis DEBUG | Z_level aligned1 is %s", str(z_level[1][0]))
+		rospy.logwarn("|||||||||||||||||||||")
+		rospy.logdebug("Map Analysis DEBUG | Z_count map2 is %s", str(z_counter[0][1]))
+		rospy.logdebug("Map Analysis DEBUG | Z_count aligned2 is %s", str(z_counter[1][1]))
+		rospy.logdebug("Map Analysis DEBUG | Z_level map2 is %s", str(z_level[0][1]))
+		rospy.logdebug("Map Analysis DEBUG | Z_level aligned2 is %s", str(z_level[1][1]))
+		rospy.logwarn("|||||||||||||||||||||")
 
 		# Resort Data for Curve Fitting
 		for data in range(0,len(analysis_data)):
@@ -1028,7 +1171,8 @@ class MapAlignment():
 				
 		# Do some RMSE Stuff between marged map and original map
 		if len(self.data_map_analysis) != len(self.data_aligned_analysis):
-			rospy.logwarn("Map Analysis dimensions NOT same. Will not perform RMSE analysis. Map data length is: %s. Aligned data length is %s.",str(self.data_map_analysis),str(self.data_aligned_analysis))
+			pass
+			#rospy.logwarn("Map Analysis dimensions NOT same. Will not perform RMSE analysis. Map data length is: %s. Aligned data length is %s.",str(self.data_map_analysis),str(self.data_aligned_analysis))
 		else:
 			# Store the values 
 			rmse_err = []
@@ -1080,7 +1224,8 @@ def reconfigure(config,level):
 ###################################
 
 if __name__ == '__main__':
-	rospy.init_node("map_alignment",anonymous=True, log_level=rospy.INFO)
+	log_level = rospy.DEBUG
+	rospy.init_node("map_alignment",anonymous=True, log_level=log_level)
 	# If plot Visualize - True, need to call it in the main loop.
 	alignment = MapAlignment(plot_visualize=False,analyze=True)
 
@@ -1090,20 +1235,24 @@ if __name__ == '__main__':
 	while not rospy.is_shutdown():
 		try:
 			# Wait for Data and robot to be at waypoint.
+			if log_level == rospy.DEBUG:
+				alignment.align_pub1.publish(alignment.final_map_info_reference)
+				alignment.align_pub2.publish(alignment.final_map_info_incoming)
+
 			if len(alignment.contour_data[0]) > 0 and len(alignment.contour_data[1]) > 0 and alignment.at_waypoint:
 				rospy.loginfo_once("Near Waypoint AND Voxel Data loaded.")
 
 				# Call the Feature Finders ONCE...
 				if not alignment.features_found:
 					rospy.loginfo("Looking for map features.")
-					alignment.feature_finder(data=alignment.contour_data[0],map_name="Turtle")
-					alignment.feature_finder(data=alignment.contour_data[1],map_name="Rbkairos")
+					alignment.feature_finder(data=alignment.contour_data[0],map_name="Top REFERENCE",lower_h_limit=7,upper_h_limit = 13)
+					alignment.feature_finder(data=alignment.contour_data[1],map_name="Bottom INCOMING",lower_h_limit=2,upper_h_limit = 6)
 					rospy.logdebug("Features %s",str(alignment.features))
 					alignment.features_found = True
 
 				# Call the Map Alignment ONCE....
 				if not alignment.aligned:
-					alignment.align_maps()
+					alignment.align_maps(dxi = 0, dyi = 0, dzi = -1.01)
 					rospy.loginfo("Maps aligned.")
 
 				# Call the map verification ONCE...
@@ -1121,8 +1270,6 @@ if __name__ == '__main__':
 				if alignment.merged:
 					alignment.align_pub.publish(alignment.fullmerge)
 
-					alignment.align_pub1.publish(alignment.final_merge)
-
 					# Analyze the data if enabled Opposite of the analyze boolean.
 					if alignment.analyzed == False:
 						alignment.map_analysis()
@@ -1130,8 +1277,17 @@ if __name__ == '__main__':
 					# Show plots if visualization enabled. 
 					if alignment.plot_visualize:
 						if not visualized_map:
+							rospy.loginfo("VISUALIZING MAP.")
+							'''
 							for i in range(0,len(alignment.contour_data)):
-								alignment.feature_finder(data=alignment.contour_data[i],map_name="merged",visualize=True)
+								alignment.feature_finder(data=alignment.contour_data[i],map_name="merged",visualize=True,lower_h_limit=0,upper_h_limit = 8, fig = 1)
+							'''
+							# REFERENCE DATA is TOP = 0
+							# INCOMING DATA is BOTTOM = 1
+							alignment.feature_finder(data=alignment.contour_data[0],map_name="top",visualize=True,lower_h_limit=7,upper_h_limit = 13)
+							# EXCLUDE 0,1,7+
+							alignment.feature_finder(data=alignment.contour_data[1],map_name="bottom",visualize=True,lower_h_limit=2,upper_h_limit = 6)
+
 							visualized_map = True
 							#print("ALIGNMENT LENGTH",len(alignment.contour_data))
 
@@ -1141,14 +1297,15 @@ if __name__ == '__main__':
 				#srv = Server(rbkairos_alignmentConfig, reconfigure)
 				#converter.debugger()
 			else:
+				rospy.logdebug_throttle(10,"Countor data 1 len: %s | 2: %s",str(len(alignment.contour_data[0])),str(len(alignment.contour_data[1])))
 				if alignment.at_waypoint:
-					rospy.loginfo_once("Waiting to get near Waypoint")
+					rospy.loginfo_throttle(10,"Waiting to get near Waypoint")
 				else:
-					rospy.loginfo_once("Near waypoint. Waiting for voxel data.")
+					rospy.loginfo_throttle(10,"Near waypoint. Waiting for voxel data.")
 					if len(alignment.contour_data[0]) >= 1:
-						rospy.loginfo_once("Map data loaded.")
+						rospy.loginfo_throttle(10,"Map data loaded.")
 					elif len(alignment.contour_data[1]) >= 1:
-						rospy.loginfo_once("Incoming data loaded.")
+						rospy.loginfo_throttle(10,"Incoming data loaded.")
 
 		except rospy.ROSInterruptException:
 			rospy.logfatal(rospy.ROSInterruptException)
